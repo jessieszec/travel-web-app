@@ -1,39 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>森系旅行手帳</title>
+    <title>Nature Travel Planner</title>
     
-    <!-- 引入 Tailwind CSS 用作快速極簡排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 引入 FontAwesome 作為 Icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: Inter (極簡現代字體) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind 主題設定 (森林大自然色調) -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
                     colors: {
-                        forest: {
-                            50: '#f0f4f1',  /* 極淺綠，用作背景 */
-                            100: '#dce5df',
-                            500: '#4a7c59', /* 主按鈕、強調色 */
-                            700: '#2d4a36', /* 深標題色 */
-                            900: '#1a2e20', /* 極深文字 */
-                        },
-                        earth: {
-                            50: '#faf9f7',  /* 石灰白，用作卡片背景 */
-                            100: '#f0ece3',
-                        }
+                        forest: { 50: '#f0f4f1', 100: '#dce5df', 500: '#4a7c59', 700: '#2d4a36', 900: '#1a2e20', },
+                        earth: { 50: '#faf9f7', 100: '#f0ece3', }
                     }
                 }
             }
@@ -41,23 +24,10 @@
     </script>
 
     <style>
-        /* 隱藏捲軸但保留捲動功能，令畫面更乾淨 */
         ::-webkit-scrollbar { display: none; }
         body { -ms-overflow-style: none; scrollbar-width: none; background-color: #f0f4f1; }
-        
-        /* 避免 iOS Safari 彈出鍵盤時版面移位 */
-        .app-container {
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-        }
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 80px; /* 留位俾 Bottom Nav */
-        }
-        
-        /* 卡片出現動畫 */
+        .app-container { height: 100dvh; display: flex; flex-direction: column; }
+        .content-area { flex: 1; overflow-y: auto; padding-bottom: 80px; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -67,117 +37,124 @@
 </head>
 <body class="text-forest-900 antialiased selection:bg-forest-500 selection:text-white">
 
-    <!-- 限制 App 最大闊度，喺電腦睇都似手機 App -->
-    <div class="app-container max-w-md mx-auto bg-forest-50 relative shadow-2xl">
+    <!-- Login Screen -->
+    <div id="login-screen" class="fixed inset-0 bg-forest-50 z-[100] flex flex-col justify-center items-center p-6 transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center border border-forest-100">
+            <div class="w-16 h-16 bg-forest-100 text-forest-500 rounded-full flex justify-center items-center mx-auto mb-4 text-3xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-forest-700 mb-2">Private Itinerary</h2>
+            <p class="text-sm text-gray-500 mb-6">Enter password to view</p>
+            
+            <form onsubmit="checkPassword(event)" class="space-y-4">
+                <input type="password" id="password-input" required placeholder="Password..." class="w-full bg-forest-50 border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 text-center tracking-widest">
+                <p id="login-error" class="text-red-500 text-xs hidden">Incorrect password</p>
+                <button type="submit" class="w-full bg-forest-500 text-white font-semibold rounded-xl py-3 shadow-md hover:bg-forest-700 transition active:scale-95">
+                    Unlock
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="app-container max-w-md mx-auto bg-forest-50 relative shadow-2xl hidden opacity-0 transition-opacity duration-500">
         
         <!-- Header -->
         <header class="bg-forest-700 text-white pt-12 pb-4 px-6 shadow-md z-10">
-            <h1 id="header-title" class="text-2xl font-semibold tracking-wide">整體行程</h1>
-            <p id="sync-status" class="text-xs text-forest-100 mt-1"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>離線模式 (已讀取快取)</p>
+            <h1 id="header-title" class="text-2xl font-semibold tracking-wide">Itinerary</h1>
+            <p id="sync-status" class="text-xs text-forest-100 mt-1"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
         </header>
 
         <!-- Main Content Area -->
         <main class="content-area p-5">
+            <!-- Itinerary Tab -->
+            <div id="view-itinerary" class="tab-view space-y-4"></div>
             
-            <!-- 1. 行程 (Itinerary) -->
-            <div id="view-itinerary" class="tab-view space-y-4">
-                <!-- 內容由 JS 動態生成 -->
-            </div>
-
-            <!-- 2. 住宿 (Accommodation) -->
-            <div id="view-accommodation" class="tab-view hidden space-y-4">
-                <!-- 內容由 JS 動態生成 -->
-            </div>
-
-            <!-- 3. 錢銀成本 (Expenses) -->
+            <!-- Accommodation Tab -->
+            <div id="view-accommodation" class="tab-view hidden space-y-4"></div>
+            
+            <!-- Expenses Tab -->
             <div id="view-expenses" class="tab-view hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-lg font-semibold text-forest-700">消費紀錄</h2>
+                    <h2 class="text-lg font-semibold text-forest-700">Expenses</h2>
                     <button onclick="openExpenseModal()" class="bg-forest-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:bg-forest-700 transition active:scale-95">
-                        <i class="fa-solid fa-plus mr-1"></i> 新增
+                        <i class="fa-solid fa-plus mr-1"></i> Add
                     </button>
                 </div>
-                <div id="expenses-list" class="space-y-3">
-                    <!-- 內容由 JS 動態生成 -->
-                </div>
+                <div id="expenses-list" class="space-y-3"></div>
             </div>
 
-            <!-- 4. 執行李清單 (Packing List) -->
-            <div id="view-packing" class="tab-view hidden space-y-4">
-                <!-- 內容由 JS 動態生成 -->
-            </div>
-
+            <!-- Packing List Tab -->
+            <div id="view-packing" class="tab-view hidden space-y-4"></div>
         </main>
 
-        <!-- Bottom Navigation (毛玻璃效果) -->
+        <!-- Bottom Navigation -->
         <nav class="absolute bottom-0 w-full bg-white/80 backdrop-blur-md border-t border-forest-100 pb-safe pt-2 px-6 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
-            <button onclick="switchTab('itinerary', '整體行程')" class="nav-btn flex flex-col items-center p-2 text-forest-500 w-16">
+            <button onclick="switchTab('itinerary', 'Itinerary')" class="nav-btn flex flex-col items-center p-2 text-forest-500 w-16">
                 <i class="fa-solid fa-route text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">行程</span>
+                <span class="text-[10px] font-medium">Plan</span>
             </button>
-            <button onclick="switchTab('accommodation', '住宿詳情')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
+            <button onclick="switchTab('accommodation', 'Accommodation')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
                 <i class="fa-solid fa-bed text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">住宿</span>
+                <span class="text-[10px] font-medium">Hotels</span>
             </button>
-            <button onclick="switchTab('expenses', '錢銀成本')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
+            <button onclick="switchTab('expenses', 'Expenses')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
                 <i class="fa-solid fa-wallet text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">記帳</span>
+                <span class="text-[10px] font-medium">Costs</span>
             </button>
-            <button onclick="switchTab('packing', '執行李清單')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
+            <button onclick="switchTab('packing', 'Packing List')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
                 <i class="fa-solid fa-suitcase-rolling text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">清單</span>
+                <span class="text-[10px] font-medium">Pack</span>
             </button>
         </nav>
 
-        <!-- Add Expense Modal (彈出式表單) -->
+        <!-- Add Expense Modal (Simplified structure for now, matching your previous layout) -->
         <div id="expense-modal" class="hidden fixed inset-0 bg-forest-900/40 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
             <div class="bg-earth-50 w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-0">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-forest-700">新增消費</h3>
+                    <h3 class="text-xl font-bold text-forest-700">New Expense</h3>
                     <button onclick="closeExpenseModal()" class="text-gray-400 hover:text-forest-700 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 
                 <form id="expense-form" class="space-y-4" onsubmit="submitExpense(event)">
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">種類 (Category)</label>
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Category</label>
                         <select id="exp-category" required class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 focus:ring-1 focus:ring-forest-500">
-                            <option value="" disabled selected>請選擇種類</option>
-                            <option value="酒店">🏨 酒店</option>
-                            <option value="租車/交通">🚗 租車/交通</option>
-                            <option value="食飯">🍽️ 食飯</option>
-                            <option value="買餸">🛒 買餸</option>
-                            <option value="門票/玩樂">🎟️ 門票/玩樂</option>
-                            <option value="其他">📌 其他</option>
+                            <option value="" disabled selected>Select category</option>
+                            <option value="Hotel">🏨 Hotel</option>
+                            <option value="Transport">🚗 Transport</option>
+                            <option value="Food">🍽️ Food</option>
+                            <option value="Groceries">🛒 Groceries</option>
+                            <option value="Tickets">🎟️ Tickets</option>
+                            <option value="Others">📌 Others</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">項目名稱</label>
-                        <input type="text" id="exp-name" required placeholder="例如：晚飯 @ Keg Steakhouse" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Item Name</label>
+                        <input type="text" id="exp-name" required placeholder="e.g. Dinner @ Keg" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">金額 (Amount)</label>
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Amount</label>
                         <input type="number" step="0.01" id="exp-amount" required placeholder="0.00" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-forest-700 mb-1">由誰付款 (Pay By)</label>
+                            <label class="block text-sm font-medium text-forest-700 mb-1">Pay By</label>
                             <select id="exp-payby" required class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
-                                <option value="我">我</option>
-                                <option value="朋友A">朋友A</option>
-                                <option value="朋友B">朋友B</option>
+                                <option value="Me">Me</option>
+                                <option value="Friend A">Friend A</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-forest-700 mb-1">參與者 (Share)</label>
+                            <label class="block text-sm font-medium text-forest-700 mb-1">Share With</label>
                             <select id="exp-participants" required class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
-                                <option value="所有人">所有人</option>
-                                <option value="我+朋友A">我 + 朋友A</option>
-                                <option value="個人消費">個人消費</option>
+                                <option value="All">All</option>
+                                <option value="Individual">Individual</option>
                             </select>
                         </div>
                     </div>
                     <button type="submit" id="exp-submit-btn" class="w-full bg-forest-500 text-white font-semibold rounded-xl py-4 mt-4 shadow-lg hover:bg-forest-700 transition active:scale-95 flex justify-center items-center">
-                        <span>儲存紀錄</span>
+                        <span>Save Record</span>
                     </button>
                 </form>
             </div>
@@ -185,33 +162,62 @@
 
     </div>
 
-    <!-- JavaScript 邏輯 -->
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg text-sm transition-opacity duration-300 opacity-0 pointer-events-none z-[200]">
+        Address copied!
+    </div>
+
+    <!-- JavaScript -->
     <script>
-        // 【重要】將你部署完 Google Apps Script 得到嘅 Web App URL 貼喺度！
-        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxjdAWsoFI1T-D62D_Wv4WwrF5fHaZuXyt57UGi2FzA2MIDGuBRnGprXDt6avdG8jgw2g/exec"; 
+        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycby5t4LgJ3wL3v55c-V0L16mB7c-NfW4r2y5oB90T93L_b0o3x6r7s_m6B9767C7xR8/exec"; 
+        const APP_PASSWORD = "123"; 
 
-        // 全局資料狀態 (用嚟做 Offline Caching)
-        let appData = {
-            itinerary: [],
-            accommodation: [],
-            expenses: [],
-            packing: []
-        };
-
-        // UI 初始化
         document.addEventListener('DOMContentLoaded', () => {
-            loadCachedData(); // 先由 local 讀取 (支援離線查看)
-            fetchDataFromSheet(); // 再嘗試喺背景更新資料
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                showMainApp();
+            }
         });
 
-        // 1. 切換下方 Tab
+        function checkPassword(e) {
+            e.preventDefault();
+            const input = document.getElementById('password-input').value;
+            const errorMsg = document.getElementById('login-error');
+            
+            if (input === APP_PASSWORD) {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                showMainApp();
+            } else {
+                errorMsg.classList.remove('hidden');
+                document.getElementById('password-input').value = '';
+            }
+        }
+
+        function showMainApp() {
+            const loginScreen = document.getElementById('login-screen');
+            const mainApp = document.getElementById('main-app');
+            
+            loginScreen.style.opacity = '0';
+            setTimeout(() => {
+                loginScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                setTimeout(() => { mainApp.classList.remove('opacity-0'); }, 50);
+                initializeApp();
+            }, 300);
+        }
+
+        let appData = { itinerary: [], accommodation: [], expenses: [], packing: [] };
+
+        function initializeApp() {
+            loadCachedData();
+            fetchDataFromSheet();
+        }
+
         function switchTab(tabId, title) {
             document.getElementById('header-title').innerText = title;
             document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
             document.getElementById(`view-${tabId}`).classList.add('fade-in');
 
-            // 轉 Bottom Nav 顏色
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-forest-500');
                 btn.classList.add('text-gray-400');
@@ -220,140 +226,206 @@
             event.currentTarget.classList.add('text-forest-500');
         }
 
-        // 2. 打開/關閉記帳 Modal
         function openExpenseModal() { document.getElementById('expense-modal').classList.remove('hidden'); }
         function closeExpenseModal() { document.getElementById('expense-modal').classList.add('hidden'); }
 
-        // 3. 讀取 Local Storage (離線查看核心)
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        }
+
+        function copyToClipboard(text) {
+            // Use legacy execCommand as fallback for better compatibility in PWA/iframes
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";  // Avoid scrolling to bottom
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if(successful) {
+                    showToast('Address Copied!');
+                } else {
+                    showToast('Failed to copy');
+                }
+            } catch (err) {
+                showToast('Failed to copy');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Helper to format date if it's a valid date string, otherwise return as is
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            // Basic regex to check if it looks like a date we might want to format
+            // Often Google Sheets returns ISO strings or similar
+            const d = new Date(dateString);
+            if (!isNaN(d.getTime()) && dateString.includes('-') || dateString.includes('/')) {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            return dateString;
+        }
+
         function loadCachedData() {
             const cached = localStorage.getItem('travelAppData');
             if (cached) {
                 appData = JSON.parse(cached);
                 renderAllData();
             } else {
-                // 如果無快取，載入啲 Demo Data 等個 App 唔會吉晒 (可刪除)
-                appData.itinerary = [{ '日期': 'Day 1', '時間': '10:00 AM', '活動': '到達機場', '地點': 'Vancouver International Airport' }];
-                appData.expenses = [{ '日期': '今日', '種類': '食飯', '項目名稱': '機場咖啡', '金額': '15.5', '由誰支付': '我', '參與者': '所有人' }];
+                appData.itinerary = [{ '日期': 'Day 1', '時間': '10:00 AM', '活動': 'Arrive', '地點': 'Airport' }];
                 renderAllData();
             }
         }
 
-        // 4. 從 Google Sheet 攞最新資料
         async function fetchDataFromSheet() {
-            if(!GAS_WEBAPP_URL.startsWith('http')) return; // 防呆
-            
+            if(!GAS_WEBAPP_URL.startsWith('http')) return;
             try {
-                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1"></i>正在同步...';
+                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1"></i>Syncing...';
                 const response = await fetch(GAS_WEBAPP_URL);
                 const data = await response.json();
-                
                 appData = data;
-                localStorage.setItem('travelAppData', JSON.stringify(appData)); // 更新快取
+                localStorage.setItem('travelAppData', JSON.stringify(appData));
                 renderAllData();
-                
-                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-check-circle mr-1 text-green-400"></i>已更新至最新';
-                setTimeout(() => { document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-cloud text-forest-100 mr-1"></i>雲端同步中'; }, 3000);
+                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-check-circle mr-1 text-green-400"></i>Up to date';
+                setTimeout(() => { document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-cloud text-forest-100 mr-1"></i>Cloud sync active'; }, 3000);
             } catch (error) {
-                console.log("Fetch Error:", error);
-                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-wifi mr-1 text-red-300"></i>無網絡連線 (離線模式)';
+                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-wifi mr-1 text-red-300"></i>Offline mode';
             }
         }
 
-        // 5. 渲染資料到畫面 (DOM Manipulation)
         function renderAllData() {
-            // -- 渲染行程 --
+            // --- Itinerary (Unchanged logic, just english fallback) ---
             const itContainer = document.getElementById('view-itinerary');
             itContainer.innerHTML = appData.itinerary.map(item => `
                 <div class="bg-earth-50 rounded-2xl p-4 shadow-sm border border-earth-100 relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-1 h-full bg-forest-500"></div>
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-xs font-bold text-forest-500 bg-forest-100 px-2 py-1 rounded-md uppercase tracking-wider">${item['日期'] || 'N/A'}</span>
-                            <span class="text-xs text-gray-500 ml-2"><i class="fa-regular fa-clock mr-1"></i>${item['時間'] || ''}</span>
-                            <h3 class="text-lg font-bold text-forest-900 mt-2">${item['活動'] || '未命名活動'}</h3>
-                        </div>
+                    <div>
+                        <span class="text-xs font-bold text-forest-500 bg-forest-100 px-2 py-1 rounded-md tracking-wider">${item['日期'] || 'N/A'}</span>
+                        <span class="text-xs text-gray-500 ml-2"><i class="fa-regular fa-clock mr-1"></i>${item['時間'] || ''}</span>
+                        <h3 class="text-lg font-bold text-forest-900 mt-2">${item['活動'] || 'Unnamed'}</h3>
                     </div>
-                    ${item['地點'] ? `
-                    <a href="https://maps.google.com/?q=${encodeURIComponent(item['地點'])}" target="_blank" class="mt-3 inline-flex items-center text-sm text-forest-700 bg-forest-50 px-3 py-1.5 rounded-lg hover:bg-forest-100 transition">
-                        <i class="fa-solid fa-location-dot mr-2 text-forest-500"></i> ${item['地點']}
-                    </a>` : ''}
+                    ${item['地點'] ? `<a href="https://maps.google.com/?q=${encodeURIComponent(item['地點'])}" target="_blank" class="mt-3 inline-flex items-center text-sm text-forest-700 bg-forest-50 px-3 py-1.5 rounded-lg hover:bg-forest-100 transition"><i class="fa-solid fa-location-dot mr-2 text-forest-500"></i> ${item['地點']}</a>` : ''}
                 </div>
-            `).join('') || '<p class="text-center text-gray-400 mt-10">暫時冇行程資料</p>';
+            `).join('') || '<p class="text-center text-gray-400 mt-10">No itinerary data</p>';
 
-            // -- 渲染住宿 --
+            // --- Accommodation (NEW LOGIC) ---
             const accContainer = document.getElementById('view-accommodation');
-            accContainer.innerHTML = appData.accommodation.map(item => `
-                <div class="bg-earth-50 rounded-2xl p-4 shadow-sm border border-earth-100">
-                    <div class="flex items-center mb-2">
-                        <div class="bg-forest-100 text-forest-700 w-10 h-10 rounded-full flex justify-center items-center mr-3">
-                            <i class="fa-solid fa-hotel"></i>
+            
+            // 1. Sort accommodation by Check-date
+            let sortedAcc = [...appData.accommodation].sort((a, b) => {
+                const dateA = new Date(a['Check-date'] || 0);
+                const dateB = new Date(b['Check-date'] || 0);
+                return dateA - dateB;
+            });
+
+            accContainer.innerHTML = sortedAcc.map(item => {
+                const location = item['Location'] || '';
+                const hotelName = item['Hotel Name'] || 'Unknown Hotel';
+                const address = item['Address'] || '';
+                const checkDate = formatDate(item['Check-date']);
+                const nights = item['Nights'] ? `${item['Nights']} Nights` : '';
+                const checkInTime = item['Check-in Time'] || '--:--';
+                const checkOutTime = item['Check-out Time'] || '--:--';
+                const link = item['Link'] || '';
+
+                return `
+                <div class="bg-white rounded-2xl shadow-sm border border-earth-100 overflow-hidden mb-4">
+                    <!-- Top Bar: Date & Nights -->
+                    <div class="bg-forest-50 px-4 py-2 flex justify-between items-center border-b border-forest-100">
+                        <span class="text-sm font-bold text-forest-700"><i class="fa-regular fa-calendar-check mr-1"></i>${checkDate || 'TBD'}</span>
+                        ${nights ? `<span class="text-xs font-medium text-forest-500 bg-white px-2 py-1 rounded-md shadow-sm">🌙 ${nights}</span>` : ''}
+                    </div>
+
+                    <!-- Middle: Location & Hotel Name -->
+                    <div class="p-4">
+                        ${location ? `<p class="text-xs text-gray-500 mb-1 uppercase tracking-wide"><i class="fa-solid fa-location-dot mr-1"></i>${location}</p>` : ''}
+                        <h3 class="text-xl font-bold text-forest-900 mb-3">${hotelName}</h3>
+                        
+                        <!-- Check In/Out Times -->
+                        <div class="flex bg-earth-50 rounded-xl p-3 mb-4 text-sm border border-earth-100">
+                            <div class="flex-1 text-center border-r border-earth-100">
+                                <p class="text-xs text-gray-500 mb-1">Check-in</p>
+                                <p class="font-semibold text-forest-700"><i class="fa-solid fa-arrow-right-to-bracket mr-1 opacity-70"></i>${checkInTime}</p>
+                            </div>
+                            <div class="flex-1 text-center">
+                                <p class="text-xs text-gray-500 mb-1">Check-out</p>
+                                <p class="font-semibold text-forest-700"><i class="fa-solid fa-arrow-right-from-bracket mr-1 opacity-70"></i>${checkOutTime}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-forest-900">${item['酒店名稱'] || item['Name'] || '酒店'}</h3>
-                            <p class="text-xs text-gray-500">${item['日期'] || item['Dates'] || ''}</p>
+
+                        <!-- Address -->
+                        ${address ? `
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 mb-1">Address</p>
+                            <p class="text-sm text-gray-700 leading-snug">${address}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap gap-2">
+                            ${address ? `
+                            <button onclick="copyToClipboard('${address.replace(/'/g, "\\'")}')" class="flex-1 bg-white border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-50 transition flex justify-center items-center">
+                                <i class="fa-regular fa-copy mr-2"></i> Copy
+                            </button>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent(address)}" target="_blank" class="flex-1 bg-forest-50 border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-100 transition flex justify-center items-center">
+                                <i class="fa-solid fa-map mr-2"></i> Map
+                            </a>
+                            ` : ''}
+                            ${link ? `
+                            <a href="${link}" target="_blank" class="w-full mt-2 bg-forest-500 text-white py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-forest-600 transition flex justify-center items-center">
+                                <i class="fa-solid fa-link mr-2"></i> View Booking
+                            </a>
+                            ` : ''}
                         </div>
                     </div>
-                    ${item['地址'] || item['Address'] ? `
-                    <a href="https://maps.google.com/?q=${encodeURIComponent(item['地址'] || item['Address'])}" target="_blank" class="block w-full text-center mt-3 text-sm text-forest-700 bg-forest-50 py-2 rounded-xl">
-                        <i class="fa-solid fa-map-location-dot mr-1"></i> 打開地圖
-                    </a>` : ''}
                 </div>
-            `).join('') || '<p class="text-center text-gray-400 mt-10">暫時冇住宿資料</p>';
+                `;
+            }).join('') || '<p class="text-center text-gray-400 mt-10">No accommodation found</p>';
 
-            // -- 渲染消費紀錄 --
+            // --- Expenses (Unchanged logic, just english fallback) ---
             const expContainer = document.getElementById('expenses-list');
-            // 倒序排列等最新嘅排最前
             const sortedExp = [...appData.expenses].reverse();
             expContainer.innerHTML = sortedExp.map(item => `
                 <div class="bg-earth-50 rounded-2xl p-4 shadow-sm border border-earth-100 flex justify-between items-center">
                     <div class="flex items-center">
-                        <div class="bg-forest-50 text-forest-500 w-10 h-10 rounded-full flex justify-center items-center mr-3 text-lg">
-                            ${getCategoryIcon(item['種類'] || item['Category'])}
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-forest-900 text-sm">${item['項目名稱'] || item['Item'] || '消費'}</h4>
-                            <p class="text-[11px] text-gray-500">${item['由誰支付'] || ''} 付款 • Share: ${item['參與者'] || ''}</p>
-                        </div>
+                        <div class="bg-forest-50 text-forest-500 w-10 h-10 rounded-full flex justify-center items-center mr-3 text-lg">${getCategoryIcon(item['種類'] || item['Category'])}</div>
+                        <div><h4 class="font-semibold text-forest-900 text-sm">${item['項目名稱'] || item['Item'] || 'Expense'}</h4><p class="text-[11px] text-gray-500">${item['由誰支付'] || ''} paid • Share: ${item['參與者'] || ''}</p></div>
                     </div>
-                    <div class="text-right">
-                        <p class="font-bold text-forest-700">$${item['金額'] || item['Amount'] || 0}</p>
-                    </div>
+                    <div class="text-right"><p class="font-bold text-forest-700">$${item['金額'] || item['Amount'] || 0}</p></div>
                 </div>
-            `).join('') || '<p class="text-center text-gray-400 mt-10">無記帳紀錄</p>';
+            `).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
 
-            // -- 渲染 Packing List --
+            // --- Packing (Unchanged logic, just english fallback) ---
             const packContainer = document.getElementById('view-packing');
             packContainer.innerHTML = appData.packing.map(item => `
                 <div class="flex items-center justify-between border-b border-forest-100 py-3 px-2">
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" class="w-5 h-5 text-forest-500 rounded border-gray-300 focus:ring-forest-500">
-                        <div>
-                            <p class="font-medium text-forest-900 text-sm">${item['項目'] || item['Item'] || '物品'}</p>
-                            <p class="text-[10px] text-forest-500 bg-forest-100 px-2 rounded-full inline-block mt-1">${item['種類'] || item['Category'] || '一般'}</p>
-                        </div>
-                    </div>
+                    <div class="flex items-center gap-3"><input type="checkbox" class="w-5 h-5 text-forest-500 rounded border-gray-300 focus:ring-forest-500"><div><p class="font-medium text-forest-900 text-sm">${item['項目'] || item['Item'] || 'Item'}</p><p class="text-[10px] text-forest-500 bg-forest-100 px-2 rounded-full inline-block mt-1">${item['種類'] || item['Category'] || 'General'}</p></div></div>
                     <span class="text-xs text-gray-400">x${item['數量'] || item['Quantity'] || 1}</span>
                 </div>
-            `).join('') || '<p class="text-center text-gray-400 mt-10">清單吉空空</p>';
+            `).join('') || '<p class="text-center text-gray-400 mt-10">List is empty</p>';
         }
 
-        // 小工具：根據種類回傳 Icon
         function getCategoryIcon(cat) {
             if(!cat) return '<i class="fa-solid fa-receipt"></i>';
-            if(cat.includes('酒店')) return '🏨';
-            if(cat.includes('車') || cat.includes('交通')) return '🚗';
-            if(cat.includes('食')) return '🍽️';
-            if(cat.includes('餸') || cat.includes('超市')) return '🛒';
-            if(cat.includes('門票') || cat.includes('玩')) return '🎟️';
+            if(cat.includes('Hotel') || cat.includes('酒店')) return '🏨';
+            if(cat.includes('Transport') || cat.includes('車')) return '🚗';
+            if(cat.includes('Food') || cat.includes('食')) return '🍽️';
+            if(cat.includes('Groceries') || cat.includes('餸')) return '🛒';
+            if(cat.includes('Ticket') || cat.includes('門票')) return '🎟️';
             return '📌';
         }
 
-        // 6. 提交新增消費 (POST to Google Sheet)
         async function submitExpense(e) {
             e.preventDefault();
             const btn = document.getElementById('exp-submit-btn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 儲存中...';
-            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; btn.disabled = true;
 
             const payload = {
                 action: 'addExpense',
@@ -365,35 +437,17 @@
             };
 
             try {
-                if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('未設定 URL');
+                if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
+                await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
                 
-                await fetch(GAS_WEBAPP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
+                appData.expenses.push({ 'Date': 'Just now', 'Category': payload.category, 'Item': payload.itemName, 'Amount': payload.amount, 'Paid By': payload.payBy, 'Share': payload.participants });
+                renderAllData(); localStorage.setItem('travelAppData', JSON.stringify(appData));
                 
-                // 成功後先喺 Local 端強行加一筆等畫面即時更新
-                appData.expenses.push({
-                    '日期': '剛才',
-                    '種類': payload.category,
-                    '項目名稱': payload.itemName,
-                    '金額': payload.amount,
-                    '由誰支付': payload.payBy,
-                    '參與者': payload.participants
-                });
-                renderAllData();
-                localStorage.setItem('travelAppData', JSON.stringify(appData));
-                
-                // 清空表單並關閉
-                document.getElementById('expense-form').reset();
-                closeExpenseModal();
-                fetchDataFromSheet(); // 叫佢喺背後再 Sync 一次
-                
+                document.getElementById('expense-form').reset(); closeExpenseModal(); fetchDataFromSheet();
             } catch (error) {
-                alert('上載失敗，請檢查網絡連線或 App Script 網址設定！');
+                alert('Failed to upload. Check network or script URL.');
             } finally {
-                btn.innerHTML = '<span>儲存紀錄</span>';
-                btn.disabled = false;
+                btn.innerHTML = '<span>Save Record</span>'; btn.disabled = false;
             }
         }
     </script>
