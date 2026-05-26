@@ -307,16 +307,22 @@
                 });
             }
 
+            // Accommodation - Remove time from date
             accContainer.innerHTML = sortedAcc.map(item => {
                 const location = item['Location'] || '';
                 const hotelName = item['Hotel Name'] || 'Unknown Hotel';
                 const address = item['Address'] || '';
-                const checkDate = item['Check-date'] || ''; 
+                
+                // 這裡：將日期強制截取為 YYYY-MM-DD 格式
+                let rawDate = item['Check-date'] ? item['Check-date'].toString() : '';
+                const checkDate = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate; 
+                
                 const nights = item['Nights'] ? `${item['Nights']} Nights` : '';
                 
                 let checkInTime = item['Check-in Time'] || '--:--';
                 let checkOutTime = item['Check-out Time'] || '--:--';
                 
+                // 處理時間格式
                 if(checkInTime.length > 10 && checkInTime.includes('T')) checkInTime = new Date(checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 if(checkOutTime.length > 10 && checkOutTime.includes('T')) checkOutTime = new Date(checkOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
