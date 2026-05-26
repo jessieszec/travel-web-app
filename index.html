@@ -382,4 +382,56 @@
                     </div>
                     <div class="text-right"><p class="font-bold text-forest-700">$${item['金額'] || item['Amount'] || 0}</p></div>
                 </div>
-            `).join('') || '<p class="text-center text-gray-4
+            `).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
+
+            // Packing
+            const packContainer = document.getElementById('view-packing');
+            packContainer.innerHTML = appData.packing.map(item => `
+                <div class="flex items-center justify-between border-b border-forest-100 py-3 px-2">
+                    <div class="flex items-center gap-3"><input type="checkbox" class="w-5 h-5 text-forest-500 rounded border-gray-300 focus:ring-forest-500"><div><p class="font-medium text-forest-900 text-sm">${item['項目'] || item['Item'] || 'Item'}</p><p class="text-[10px] text-forest-500 bg-forest-100 px-2 rounded-full inline-block mt-1">${item['種類'] || item['Category'] || 'General'}</p></div></div>
+                    <span class="text-xs text-gray-400">x${item['數量'] || item['Quantity'] || 1}</span>
+                </div>
+            `).join('') || '<p class="text-center text-gray-400 mt-10">List is empty</p>';
+        }
+
+        function getCategoryIcon(cat) {
+            if(!cat) return '<i class="fa-solid fa-receipt"></i>';
+            if(cat.includes('Hotel') || cat.includes('酒店')) return '🏨';
+            if(cat.includes('Transport') || cat.includes('車')) return '🚗';
+            if(cat.includes('Food') || cat.includes('食')) return '🍽️';
+            if(cat.includes('Groceries') || cat.includes('餸')) return '🛒';
+            if(cat.includes('Ticket') || cat.includes('門票')) return '🎟️';
+            return '📌';
+        }
+
+        async function submitExpense(e) {
+            e.preventDefault();
+            const btn = document.getElementById('exp-submit-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; btn.disabled = true;
+
+            const payload = {
+                action: 'addExpense',
+                category: document.getElementById('exp-category').value,
+                itemName: document.getElementById('exp-name').value,
+                amount: document.getElementById('exp-amount').value,
+                payBy: document.getElementById('exp-payby').value,
+                participants: document.getElementById('exp-participants').value
+            };
+
+            try {
+                if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
+                await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                
+                appData.expenses.push({ 'Date': 'Just now', 'Category': payload.category, 'Item': payload.itemName, 'Amount': payload.amount, 'Paid By': payload.payBy, 'Share': payload.participants });
+                renderAllData(); localStorage.setItem('travelAppData', JSON.stringify(appData));
+                
+                document.getElementById('expense-form').reset(); closeExpenseModal(); fetchDataFromSheet();
+            } catch (error) {
+                alert('Failed to upload. Check network or script URL.');
+            } finally {
+                btn.innerHTML = '<span>Save Record</span>'; btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
