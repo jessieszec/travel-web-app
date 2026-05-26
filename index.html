@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nature Travel Planner</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap)" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -37,7 +37,6 @@
 </head>
 <body class="text-forest-900 antialiased selection:bg-forest-500 selection:text-white">
 
-    <!-- Login Screen -->
     <div id="login-screen" class="fixed inset-0 bg-forest-50 z-[100] flex flex-col justify-center items-center p-6 transition-opacity duration-300">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center border border-forest-100">
             <div class="w-16 h-16 bg-forest-100 text-forest-500 rounded-full flex justify-center items-center mx-auto mb-4 text-3xl">
@@ -56,24 +55,18 @@
         </div>
     </div>
 
-    <!-- Main App -->
     <div id="main-app" class="app-container max-w-md mx-auto bg-forest-50 relative shadow-2xl hidden opacity-0 transition-opacity duration-500">
         
-        <!-- Header -->
         <header class="bg-forest-700 text-white pt-12 pb-4 px-6 shadow-md z-10">
             <h1 id="header-title" class="text-2xl font-semibold tracking-wide">Itinerary</h1>
             <p id="sync-status" class="text-xs text-forest-100 mt-1"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
         </header>
 
-        <!-- Main Content Area -->
         <main class="content-area p-5">
-            <!-- Itinerary Tab -->
             <div id="view-itinerary" class="tab-view space-y-4"></div>
             
-            <!-- Accommodation Tab -->
             <div id="view-accommodation" class="tab-view hidden space-y-4"></div>
             
-            <!-- Expenses Tab -->
             <div id="view-expenses" class="tab-view hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-lg font-semibold text-forest-700">Expenses</h2>
@@ -84,11 +77,9 @@
                 <div id="expenses-list" class="space-y-3"></div>
             </div>
 
-            <!-- Packing List Tab -->
             <div id="view-packing" class="tab-view hidden space-y-4"></div>
         </main>
 
-        <!-- Bottom Navigation -->
         <nav class="absolute bottom-0 w-full bg-white/80 backdrop-blur-md border-t border-forest-100 pb-safe pt-2 px-6 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
             <button onclick="switchTab('itinerary', 'Itinerary')" class="nav-btn flex flex-col items-center p-2 text-forest-500 w-16">
                 <i class="fa-solid fa-route text-xl mb-1"></i>
@@ -108,7 +99,6 @@
             </button>
         </nav>
 
-        <!-- Add Expense Modal -->
         <div id="expense-modal" class="hidden fixed inset-0 bg-forest-900/40 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
             <div class="bg-earth-50 w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-0">
                 <div class="flex justify-between items-center mb-6">
@@ -162,14 +152,12 @@
 
     </div>
 
-    <!-- Notification Toast -->
     <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg text-sm transition-opacity duration-300 opacity-0 pointer-events-none z-[200]">
         Address copied!
     </div>
 
-    <!-- JavaScript -->
     <script>
-        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxjdAWsoFI1T-D62D_Wv4WwrF5fHaZuXyt57UGi2FzA2MIDGuBRnGprXDt6avdG8jgw2g/exec"; 
+        const GAS_WEBAPP_URL = "[https://script.google.com/macros/s/AKfycbxjdAWsoFI1T-D62D_Wv4WwrF5fHaZuXyt57UGi2FzA2MIDGuBRnGprXDt6avdG8jgw2g/exec](https://script.google.com/macros/s/AKfycbxjdAWsoFI1T-D62D_Wv4WwrF5fHaZuXyt57UGi2FzA2MIDGuBRnGprXDt6avdG8jgw2g/exec)"; 
         const APP_PASSWORD = "123"; 
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -237,10 +225,9 @@
         }
 
         function copyToClipboard(text) {
-            // Use legacy execCommand as fallback for better compatibility in PWA/iframes
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            textArea.style.position = "fixed";  // Avoid scrolling to bottom
+            textArea.style.position = "fixed"; 
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
@@ -258,19 +245,16 @@
             document.body.removeChild(textArea);
         }
 
-        // Helper to format date if it's a valid date string, otherwise return as is
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            // Basic regex to check if it looks like a date we might want to format
-            // Often Google Sheets returns ISO strings or similar
-            const d = new Date(dateString);
-            if (!isNaN(d.getTime()) && dateString.includes('-') || dateString.includes('/')) {
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
+        // 專門處理 DD/MM/YYYY 格式用作排序，防止出現 Invalid Date 導致 Crash
+        function parseDateForSort(dateStr) {
+            if (!dateStr) return 0;
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+                }
             }
-            return dateString;
+            return new Date(dateStr).getTime() || 0;
         }
 
         function loadCachedData() {
@@ -301,7 +285,7 @@
         }
 
         function renderAllData() {
-            // --- Itinerary (Unchanged logic, just english fallback) ---
+            // Itinerary
             const itContainer = document.getElementById('view-itinerary');
             itContainer.innerHTML = appData.itinerary.map(item => `
                 <div class="bg-earth-50 rounded-2xl p-4 shadow-sm border border-earth-100 relative overflow-hidden">
@@ -315,40 +299,41 @@
                 </div>
             `).join('') || '<p class="text-center text-gray-400 mt-10">No itinerary data</p>';
 
-            // --- Accommodation (NEW LOGIC) ---
+            // Accommodation - 完美對應你嘅 Column 同埋解決排序 Bug
             const accContainer = document.getElementById('view-accommodation');
-            
-            // 1. Sort accommodation by Check-date
-            let sortedAcc = [...appData.accommodation].sort((a, b) => {
-                const dateA = new Date(a['Check-date'] || 0);
-                const dateB = new Date(b['Check-date'] || 0);
-                return dateA - dateB;
-            });
+            let sortedAcc = [];
+            if(appData.accommodation && appData.accommodation.length > 0) {
+                sortedAcc = [...appData.accommodation].sort((a, b) => {
+                    return parseDateForSort(a['Check-date']) - parseDateForSort(b['Check-date']);
+                });
+            }
 
             accContainer.innerHTML = sortedAcc.map(item => {
                 const location = item['Location'] || '';
                 const hotelName = item['Hotel Name'] || 'Unknown Hotel';
                 const address = item['Address'] || '';
-                const checkDate = formatDate(item['Check-date']);
+                const checkDate = item['Check-date'] || ''; 
                 const nights = item['Nights'] ? `${item['Nights']} Nights` : '';
-                const checkInTime = item['Check-in Time'] || '--:--';
-                const checkOutTime = item['Check-out Time'] || '--:--';
+                
+                let checkInTime = item['Check-in Time'] || '--:--';
+                let checkOutTime = item['Check-out Time'] || '--:--';
+                
+                if(checkInTime.length > 10 && checkInTime.includes('T')) checkInTime = new Date(checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                if(checkOutTime.length > 10 && checkOutTime.includes('T')) checkOutTime = new Date(checkOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
                 const link = item['Link'] || '';
 
                 return `
                 <div class="bg-white rounded-2xl shadow-sm border border-earth-100 overflow-hidden mb-4">
-                    <!-- Top Bar: Date & Nights -->
                     <div class="bg-forest-50 px-4 py-2 flex justify-between items-center border-b border-forest-100">
                         <span class="text-sm font-bold text-forest-700"><i class="fa-regular fa-calendar-check mr-1"></i>${checkDate || 'TBD'}</span>
                         ${nights ? `<span class="text-xs font-medium text-forest-500 bg-white px-2 py-1 rounded-md shadow-sm">🌙 ${nights}</span>` : ''}
                     </div>
 
-                    <!-- Middle: Location & Hotel Name -->
                     <div class="p-4">
                         ${location ? `<p class="text-xs text-gray-500 mb-1 uppercase tracking-wide"><i class="fa-solid fa-location-dot mr-1"></i>${location}</p>` : ''}
                         <h3 class="text-xl font-bold text-forest-900 mb-3">${hotelName}</h3>
                         
-                        <!-- Check In/Out Times -->
                         <div class="flex bg-earth-50 rounded-xl p-3 mb-4 text-sm border border-earth-100">
                             <div class="flex-1 text-center border-r border-earth-100">
                                 <p class="text-xs text-gray-500 mb-1">Check-in</p>
@@ -360,7 +345,6 @@
                             </div>
                         </div>
 
-                        <!-- Address -->
                         ${address ? `
                         <div class="mb-4">
                             <p class="text-xs text-gray-500 mb-1">Address</p>
@@ -368,13 +352,12 @@
                         </div>
                         ` : ''}
                         
-                        <!-- Action Buttons -->
                         <div class="flex flex-wrap gap-2">
                             ${address ? `
                             <button onclick="copyToClipboard('${address.replace(/'/g, "\\'")}')" class="flex-1 bg-white border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-50 transition flex justify-center items-center">
                                 <i class="fa-regular fa-copy mr-2"></i> Copy
                             </button>
-                            <a href="https://maps.google.com/?q=${encodeURIComponent(address)}" target="_blank" class="flex-1 bg-forest-50 border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-100 transition flex justify-center items-center">
+                            <a href="[https://maps.google.com/?q=$](https://maps.google.com/?q=$){encodeURIComponent(address)}" target="_blank" class="flex-1 bg-forest-50 border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-100 transition flex justify-center items-center">
                                 <i class="fa-solid fa-map mr-2"></i> Map
                             </a>
                             ` : ''}
@@ -389,7 +372,7 @@
                 `;
             }).join('') || '<p class="text-center text-gray-400 mt-10">No accommodation found</p>';
 
-            // --- Expenses (Unchanged logic, just english fallback) ---
+            // Expenses
             const expContainer = document.getElementById('expenses-list');
             const sortedExp = [...appData.expenses].reverse();
             expContainer.innerHTML = sortedExp.map(item => `
@@ -402,7 +385,7 @@
                 </div>
             `).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
 
-            // --- Packing (Unchanged logic, just english fallback) ---
+            // Packing
             const packContainer = document.getElementById('view-packing');
             packContainer.innerHTML = appData.packing.map(item => `
                 <div class="flex items-center justify-between border-b border-forest-100 py-3 px-2">
