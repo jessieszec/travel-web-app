@@ -291,11 +291,10 @@
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Expense</p>
-                        <h3 class="font-display text-3xl font-semibold text-forest-700">New Expense</h3>
+                        <h3 id="expense-modal-title" class="font-display text-3xl font-semibold text-forest-700">New Expense</h3>
                     </div>
                     <button onclick="closeExpenseModal()" class="text-forest-400 hover:text-forest-700 p-3 rounded-full bg-white border border-earth-200"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
-
                 <form id="expense-form" class="space-y-4" onsubmit="submitExpense(event)">
                     <div>
                         <label class="block text-sm font-semibold text-forest-700 mb-1">Category</label>
@@ -313,7 +312,7 @@
                         <label class="block text-sm font-semibold text-forest-700 mb-1">Item / Description</label>
                         <input type="text" id="exp-name" required placeholder="e.g. Medina Breakfast" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div id="exp-date-nights-row" class="space-y-4">
                         <div>
                             <label class="block text-sm font-semibold text-forest-700 mb-1">Date</label>
                             <input type="date" id="exp-date" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
@@ -348,10 +347,35 @@
                             <label class="cursor-pointer"><input type="checkbox" name="exp-sharewith" value="CHM" class="peer hidden"><span class="block text-center px-3 py-2 rounded-full border border-earth-200 bg-white text-forest-600 text-xs font-semibold peer-checked:bg-forest-700 peer-checked:text-white peer-checked:border-forest-700 transition">CHM</span></label>
                         </div>
                     </div>
-                    <button type="submit" id="exp-submit-btn" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 mt-4 shadow-lg hover:opacity-95 transition active:scale-95 flex justify-center items-center mb-8">
+                    <button type="submit" id="exp-submit-btn" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 mt-4 shadow-lg hover:opacity-95 transition active:scale-95 flex justify-center items-center">
                         <span>Save Record</span>
                     </button>
+                    <button type="button" id="exp-delete-btn" onclick="deleteCurrentEditingExpense()" class="hidden w-full bg-white border border-red-200 text-red-600 font-semibold rounded-2xl py-3 shadow-sm hover:bg-red-50 transition active:scale-95 mb-8">
+                        Delete Expense
+                    </button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Expense Action Sheet -->
+        <div id="expense-action-modal" class="hidden fixed inset-0 bg-forest-900/45 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
+            <div class="modal-sheet w-full rounded-t-[2rem] p-6 shadow-2xl">
+                <div class="mb-5">
+                    <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Expense Options</p>
+                    <h3 id="expense-action-title" class="font-display text-2xl font-semibold text-forest-700 leading-tight mt-1">Manage Expense</h3>
+                    <p id="expense-action-subtitle" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+                <div class="space-y-3 mb-6">
+                    <button onclick="editSelectedExpense()" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 shadow-lg active:scale-95 transition">
+                        Edit Expense
+                    </button>
+                    <button onclick="deleteSelectedExpense()" class="w-full bg-white border border-red-200 text-red-600 font-semibold rounded-2xl py-4 shadow-sm hover:bg-red-50 active:scale-95 transition">
+                        Delete Expense
+                    </button>
+                    <button onclick="closeExpenseActionModal()" class="w-full bg-white border border-earth-200 text-forest-600 font-semibold rounded-2xl py-3 shadow-sm active:scale-95 transition">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -406,6 +430,9 @@
         let currentExpenseCurrency = 'CAD';
         const EXPENSE_PEOPLE = ['PWS', 'KCW', 'FST', 'KCH', 'CHM'];
         const CAD_TO_HKD_RATE = 5.7;
+        let editingExpenseRowNumber = null;
+        let selectedExpenseForAction = null;
+        let expenseLongPressTimer = null;
 
         function initializeApp() {
             loadCachedData();
@@ -427,6 +454,7 @@
         }
 
         function openExpenseModal() {
+            resetExpenseFormForAdd();
             document.getElementById('expense-modal').classList.remove('hidden');
             const dateInput = document.getElementById('exp-date');
             if (dateInput && !dateInput.value) {
@@ -435,6 +463,19 @@
             toggleNightsField();
         }
         function closeExpenseModal() { document.getElementById('expense-modal').classList.add('hidden'); }
+
+        function resetExpenseFormForAdd() {
+            editingExpenseRowNumber = null;
+            const form = document.getElementById('expense-form');
+            if (form) form.reset();
+            document.querySelectorAll('input[name="exp-sharewith"]').forEach(input => input.checked = false);
+            const title = document.getElementById('expense-modal-title');
+            const submitBtn = document.getElementById('exp-submit-btn');
+            const deleteBtn = document.getElementById('exp-delete-btn');
+            if (title) title.innerText = 'New Expense';
+            if (submitBtn) submitBtn.innerHTML = '<span>Save Record</span>';
+            if (deleteBtn) deleteBtn.classList.add('hidden');
+        }
 
         function toggleNightsField() {
             const category = document.getElementById('exp-category')?.value;
@@ -446,6 +487,10 @@
             wrapper.classList.toggle('hidden', !shouldShow);
             nightsInput.required = shouldShow;
             if (!shouldShow) nightsInput.value = '';
+            const dateNightsRow = document.getElementById('exp-date-nights-row');
+            if (dateNightsRow) {
+                dateNightsRow.className = shouldShow ? 'grid grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-3' : 'space-y-4';
+            }
         }
 
         function setExpenseCurrency(currency) {
@@ -527,6 +572,121 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // --- Expense Modal/Action helpers ---
+        function toDateInputValue(dateStr) {
+            if (!dateStr) return new Date().toISOString().split('T')[0];
+            const str = String(dateStr).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                if (parts.length === 3) {
+                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                }
+            }
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function getExpenseShareWith(item) {
+            return EXPENSE_PEOPLE.filter(person => String(item[person]).toUpperCase() === 'TRUE');
+        }
+
+        function openExpenseActionModal(item) {
+            if (!item || !item.__rowNumber) {
+                showToast('This expense cannot be edited yet. Please sync again.');
+                return;
+            }
+
+            selectedExpenseForAction = item;
+            const title = document.getElementById('expense-action-title');
+            const subtitle = document.getElementById('expense-action-subtitle');
+            if (title) title.innerText = item['Item / Description'] || item['Item'] || 'Expense';
+            if (subtitle) subtitle.innerText = `${item['Category'] || 'Others'} • ${formatExpenseAmount(getExpenseAmount(item))}`;
+            document.getElementById('expense-action-modal').classList.remove('hidden');
+        }
+
+        function closeExpenseActionModal() {
+            document.getElementById('expense-action-modal').classList.add('hidden');
+        }
+
+        function editSelectedExpense() {
+            if (!selectedExpenseForAction) return;
+            openExpenseEditModal(selectedExpenseForAction);
+            closeExpenseActionModal();
+        }
+
+        function deleteSelectedExpense() {
+            if (!selectedExpenseForAction) return;
+            deleteExpenseByRowNumber(selectedExpenseForAction.__rowNumber);
+        }
+
+        function openExpenseEditModal(item) {
+            editingExpenseRowNumber = item.__rowNumber;
+            document.getElementById('expense-modal').classList.remove('hidden');
+
+            const title = document.getElementById('expense-modal-title');
+            const submitBtn = document.getElementById('exp-submit-btn');
+            const deleteBtn = document.getElementById('exp-delete-btn');
+            if (title) title.innerText = 'Edit Expense';
+            if (submitBtn) submitBtn.innerHTML = '<span>Save Changes</span>';
+            if (deleteBtn) deleteBtn.classList.remove('hidden');
+
+            document.getElementById('exp-category').value = item['Category'] || '';
+            document.getElementById('exp-name').value = item['Item / Description'] || item['Item'] || '';
+            document.getElementById('exp-date').value = toDateInputValue(item['Date']);
+            document.getElementById('exp-nights').value = item['Nights'] || '';
+            document.getElementById('exp-amount').value = parseMoney(item['Total Cost (CAD)'] || item['Amount']) || '';
+            document.getElementById('exp-payby').value = item['Paid By'] || '';
+
+            const shareWith = getExpenseShareWith(item);
+            document.querySelectorAll('input[name="exp-sharewith"]').forEach(input => {
+                input.checked = shareWith.includes(input.value);
+            });
+
+            toggleNightsField();
+        }
+
+        function startExpenseLongPress(itemJson) {
+            clearTimeout(expenseLongPressTimer);
+            expenseLongPressTimer = setTimeout(() => {
+                openExpenseActionModal(itemJson);
+            }, 600);
+        }
+
+        function cancelExpenseLongPress() {
+            clearTimeout(expenseLongPressTimer);
+        }
+
+        async function deleteCurrentEditingExpense() {
+            if (!editingExpenseRowNumber) return;
+            await deleteExpenseByRowNumber(editingExpenseRowNumber);
+        }
+
+        async function deleteExpenseByRowNumber(rowNumber) {
+            if (!rowNumber) return;
+            const confirmed = confirm('Delete this expense? This will remove the row from Google Sheet.');
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(GAS_WEBAPP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'deleteExpense', rowNumber: rowNumber })
+                });
+                const json = await res.json();
+                if (json.status !== 'success') throw new Error(json.message || 'Failed to delete expense');
+
+                showToast('Expense Deleted');
+                closeExpenseActionModal();
+                closeExpenseModal();
+                editingExpenseRowNumber = null;
+                selectedExpenseForAction = null;
+                fetchDataFromSheet(true);
+            } catch (error) {
+                alert('Failed to delete: ' + error.message);
+            }
         }
 
         function showToast(message) {
@@ -702,10 +862,11 @@
                 const date = item['Date'] || '';
                 const nights = item['Nights'] ? `${item['Nights']} night${Number(item['Nights']) > 1 ? 's' : ''}` : '';
                 const amount = getExpenseAmount(item);
-                const sharedWith = EXPENSE_PEOPLE.filter(person => String(item[person]).toUpperCase() === 'TRUE');
+                const sharedWith = getExpenseShareWith(item);
+                const safeItemJson = JSON.stringify(item).replace(/'/g, "&#39;");
 
                 return `
-                <div class="luxury-card rounded-[1.35rem] p-4">
+                <div oncontextmenu='event.preventDefault(); openExpenseActionModal(${safeItemJson})' ontouchstart='startExpenseLongPress(${safeItemJson})' ontouchend='cancelExpenseLongPress()' ontouchmove='cancelExpenseLongPress()' class="luxury-card rounded-[1.35rem] p-4 cursor-pointer active:scale-[0.98] transition">
                     <div class="flex justify-between items-start gap-3">
                         <div class="flex items-start min-w-0">
                             <div class="bg-earth-100 text-forest-700 w-11 h-11 rounded-2xl flex justify-center items-center mr-3 text-lg shadow-sm shrink-0">${getCategoryIcon(category)}</div>
@@ -950,9 +1111,11 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; btn.disabled = true;
 
             const shareWith = Array.from(document.querySelectorAll('input[name="exp-sharewith"]:checked')).map(input => input.value);
+            const isEditing = Boolean(editingExpenseRowNumber);
 
             const payload = {
-                action: 'addExpense',
+                action: isEditing ? 'updateExpense' : 'addExpense',
+                rowNumber: editingExpenseRowNumber,
                 category: document.getElementById('exp-category').value,
                 itemName: document.getElementById('exp-name').value,
                 date: document.getElementById('exp-date').value,
@@ -971,24 +1134,10 @@
                     throw new Error(json.message || 'Failed to save expense');
                 }
 
-                appData.expenses.push({
-                    'Category': payload.category,
-                    'Item / Description': payload.itemName,
-                    'Date': payload.date,
-                    'Nights': payload.nights,
-                    'Total Cost (CAD)': payload.amount,
-                    'Total Cost (HKD)': Number(payload.amount || 0) * CAD_TO_HKD_RATE,
-                    'Paid By': payload.payBy,
-                    'PWS': shareWith.includes('PWS') ? 'TRUE' : '',
-                    'KCW': shareWith.includes('KCW') ? 'TRUE' : '',
-                    'FST': shareWith.includes('FST') ? 'TRUE' : '',
-                    'KCH': shareWith.includes('KCH') ? 'TRUE' : '',
-                    'CHM': shareWith.includes('CHM') ? 'TRUE' : ''
-                });
-                renderAllData(); 
-
+                showToast(isEditing ? 'Expense Updated' : 'Expense Added');
                 document.getElementById('expense-form').reset();
                 document.querySelectorAll('input[name="exp-sharewith"]').forEach(input => input.checked = false);
+                editingExpenseRowNumber = null;
                 closeExpenseModal();
                 fetchDataFromSheet(true);
             } catch (error) {
