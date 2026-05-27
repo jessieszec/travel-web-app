@@ -5,19 +5,46 @@
     <!-- 加上 viewport-fit=cover 以支援 iPhone 瀏海/動態島及底部橫條全螢幕顯示 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nature Travel Planner</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- UI only change: add elegant but lightweight Google fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Playfair Display', 'serif'],
+                    },
                     colors: {
-                        forest: { 50: '#f0f4f1', 100: '#dce5df', 500: '#4a7c59', 700: '#2d4a36', 900: '#1a2e20', },
-                        earth: { 50: '#faf9f7', 100: '#f0ece3', }
+                        forest: { 
+                            50: '#F7F3EA',
+                            100: '#EEE8DC',
+                            200: '#D8CDBA',
+                            300: '#BDAF97',
+                            400: '#8A775F',
+                            500: '#395D4A',
+                            600: '#2C4A3E',
+                            700: '#1A2E28',
+                            800: '#11231F',
+                            900: '#0B1916',
+                        },
+                        earth: { 
+                            50: '#F8F4EC',
+                            100: '#EFE7D8',
+                            200: '#E2D4BD',
+                            300: '#D4B98A',
+                            400: '#B89561',
+                        },
+                        champagne: '#D4B98A'
+                    },
+                    boxShadow: {
+                        luxury: '0 18px 45px rgba(26, 46, 40, 0.12)',
+                        soft: '0 10px 25px rgba(26, 46, 40, 0.08)',
+                        nav: '0 18px 40px rgba(12, 25, 22, 0.18)',
                     }
                 }
             }
@@ -26,10 +53,14 @@
 
     <style>
         ::-webkit-scrollbar { display: none; }
-        body { -ms-overflow-style: none; scrollbar-width: none; background-color: #f0f4f1; }
-        
+        body { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+            background: radial-gradient(circle at top left, rgba(212,185,138,0.20), transparent 28%), #F8F4EC;
+        }
+
         .app-container { height: 100dvh; display: flex; flex-direction: column; }
-        
+
         .content-area { 
             flex: 1; 
             overflow-y: auto; 
@@ -37,7 +68,7 @@
             -webkit-overflow-scrolling: touch; 
             /* 已經移除有 Bug 嘅 CSS padding-bottom，改為喺 HTML 最底用實體透明方塊 */
         }
-        
+
         /* 鎖死底部導航列，並避開 iPhone 底部黑條 */
         .nav-fixed {
             position: fixed;
@@ -59,23 +90,61 @@
         }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .luxury-bg {
+            background:
+                radial-gradient(circle at 20% 0%, rgba(212,185,138,0.22), transparent 25%),
+                linear-gradient(155deg, #0B1916 0%, #1A2E28 48%, #2C4A3E 100%);
+        }
+
+        .luxury-card {
+            background: rgba(255, 252, 246, 0.94);
+            border: 1px solid rgba(216, 205, 186, 0.75);
+            box-shadow: 0 12px 32px rgba(26, 46, 40, 0.08);
+        }
+
+        .soft-panel {
+            background: linear-gradient(180deg, rgba(248,244,236,0.96), rgba(255,252,246,0.92));
+            border: 1px solid rgba(216, 205, 186, 0.75);
+        }
+
+        .ticket-edge {
+            position: relative;
+        }
+
+        .ticket-edge:before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            bottom: 12px;
+            left: 0;
+            width: 4px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #395D4A, #D4B98A);
+        }
+
+        .modal-sheet {
+            background:
+                radial-gradient(circle at top right, rgba(212,185,138,0.20), transparent 26%),
+                #F8F4EC;
+        }
     </style>
 </head>
 <body class="text-forest-900 antialiased selection:bg-forest-500 selection:text-white">
 
     <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 bg-forest-50 z-[100] flex flex-col justify-center items-center p-6 transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center border border-forest-100">
-            <div class="w-16 h-16 bg-forest-100 text-forest-500 rounded-full flex justify-center items-center mx-auto mb-4 text-3xl">
+    <div id="login-screen" class="fixed inset-0 bg-earth-50 z-[100] flex flex-col justify-center items-center p-6 transition-opacity duration-300">
+        <div class="bg-white/95 p-8 rounded-[2rem] shadow-luxury w-full max-w-sm text-center border border-earth-200">
+            <div class="w-16 h-16 luxury-bg text-earth-50 rounded-2xl flex justify-center items-center mx-auto mb-5 text-2xl shadow-soft">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <h2 class="text-2xl font-bold text-forest-700 mb-2">Private Itinerary</h2>
-            <p class="text-sm text-gray-500 mb-6">Enter password to view</p>
-            
+            <h2 class="font-display text-3xl font-semibold text-forest-700 mb-2">Private Itinerary</h2>
+            <p class="text-sm text-forest-400 mb-6">Enter password to view your trip</p>
+
             <form onsubmit="checkPassword(event)" class="space-y-4">
-                <input type="password" id="password-input" required placeholder="Password..." class="w-full bg-forest-50 border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 text-center tracking-widest">
+                <input type="password" id="password-input" required placeholder="Password..." class="w-full bg-earth-50 border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 text-center tracking-widest">
                 <p id="login-error" class="text-red-500 text-xs hidden">Incorrect password</p>
-                <button type="submit" class="w-full bg-forest-500 text-white font-semibold rounded-xl py-3 shadow-md hover:bg-forest-700 transition active:scale-95">
+                <button type="submit" class="w-full luxury-bg text-white font-semibold rounded-2xl py-3.5 shadow-soft hover:opacity-95 transition active:scale-95">
                     Unlock
                 </button>
             </form>
@@ -83,23 +152,24 @@
     </div>
 
     <!-- Main App -->
-    <div id="main-app" class="app-container max-w-md mx-auto bg-forest-50 relative shadow-2xl hidden opacity-0 transition-opacity duration-500">
-        
-        <header class="bg-forest-700 text-white header-safe pb-4 px-6 shadow-md z-10 flex justify-between items-end">
+    <div id="main-app" class="app-container max-w-md mx-auto bg-earth-50 relative shadow-2xl hidden opacity-0 transition-opacity duration-500 overflow-hidden">
+
+        <header class="luxury-bg text-white header-safe pb-6 px-6 shadow-md z-10 flex justify-between items-end rounded-b-[2rem]">
             <div>
-                <h1 id="header-title" class="text-2xl font-semibold tracking-wide">Plan</h1>
-                <p id="sync-status" class="text-xs text-forest-100 mt-1"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
+                <p class="text-[10px] uppercase tracking-[0.25em] text-earth-300 mb-1">Travel Companion</p>
+                <h1 id="header-title" class="font-display text-4xl font-semibold tracking-tight leading-none">Plan</h1>
+                <p id="sync-status" class="text-xs text-earth-100/90 mt-3"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
             </div>
-            <button onclick="fetchDataFromSheet(true)" class="text-forest-100 hover:text-white p-2">
+            <button onclick="fetchDataFromSheet(true)" class="text-earth-100 hover:text-white p-3 rounded-full bg-white/8 border border-white/10 active:scale-95 transition">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
         </header>
 
-        <main class="content-area p-5">
+        <main class="content-area p-5 pt-6">
             <!-- Itinerary Tab -->
             <div id="view-itinerary" class="tab-view space-y-4">
                 <!-- Calendar Strip -->
-                <div id="calendar-strip" class="flex space-x-3 overflow-x-auto hide-scroll pb-2 -mx-5 px-5">
+                <div id="calendar-strip" class="flex space-x-3 overflow-x-auto hide-scroll pb-3 -mx-5 px-5">
                     <!-- Days will be injected here -->
                 </div>
                 <!-- Daily Cards -->
@@ -107,15 +177,18 @@
                     <p class="text-center text-gray-400 mt-10">Loading plan...</p>
                 </div>
             </div>
-            
+
             <!-- Accommodation Tab -->
             <div id="view-accommodation" class="tab-view hidden space-y-4"></div>
-            
+
             <!-- Expenses Tab -->
             <div id="view-expenses" class="tab-view hidden space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-lg font-semibold text-forest-700">Expenses</h2>
-                    <button onclick="openExpenseModal()" class="bg-forest-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:bg-forest-700 transition active:scale-95">
+                <div class="soft-panel rounded-[1.5rem] p-4 shadow-soft flex justify-between items-center mb-2">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Travel Budget</p>
+                        <h2 class="font-display text-2xl font-semibold text-forest-700">Expenses</h2>
+                    </div>
+                    <button onclick="openExpenseModal()" class="luxury-bg text-white px-4 py-2.5 rounded-full text-sm font-semibold shadow-soft hover:opacity-95 transition active:scale-95">
                         <i class="fa-solid fa-plus mr-1"></i> Add
                     </button>
                 </div>
@@ -130,62 +203,65 @@
         </main>
 
         <!-- Bottom Navigation (Fixed to perfectly anchor at bottom) -->
-        <nav class="nav-fixed bg-white/90 backdrop-blur-md border-t border-forest-100 pt-2 px-6 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 max-w-md mx-auto">
-            <button onclick="switchTab('itinerary', 'Plan')" class="nav-btn flex flex-col items-center p-2 text-forest-500 w-16">
-                <i class="fa-solid fa-route text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">Plan</span>
-            </button>
-            <button onclick="switchTab('accommodation', 'Hotels')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
-                <i class="fa-solid fa-bed text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">Hotels</span>
-            </button>
-            <button onclick="switchTab('expenses', 'Costs')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
-                <i class="fa-solid fa-wallet text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">Costs</span>
-            </button>
-            <button onclick="switchTab('packing', 'Pack')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
-                <i class="fa-solid fa-suitcase-rolling text-xl mb-1"></i>
-                <span class="text-[10px] font-medium">Pack</span>
-            </button>
+        <nav class="nav-fixed z-20 max-w-md mx-auto px-5 pb-3">
+            <div class="bg-white/88 backdrop-blur-xl border border-earth-200 rounded-[1.75rem] px-4 py-2 flex justify-between items-center shadow-nav">
+                <button onclick="switchTab('itinerary', 'Plan')" class="nav-btn flex flex-col items-center justify-center p-2 text-white bg-forest-700 rounded-2xl w-16 min-h-[58px] transition shadow-soft">
+                    <i class="fa-solid fa-route text-lg mb-1"></i>
+                    <span class="text-[10px] font-semibold">Plan</span>
+                </button>
+                <button onclick="switchTab('accommodation', 'Hotels')" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                    <i class="fa-solid fa-bed text-lg mb-1"></i>
+                    <span class="text-[10px] font-semibold">Hotels</span>
+                </button>
+                <button onclick="switchTab('expenses', 'Costs')" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                    <i class="fa-solid fa-wallet text-lg mb-1"></i>
+                    <span class="text-[10px] font-semibold">Costs</span>
+                </button>
+                <button onclick="switchTab('packing', 'Pack')" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                    <i class="fa-solid fa-suitcase-rolling text-lg mb-1"></i>
+                    <span class="text-[10px] font-semibold">Pack</span>
+                </button>
+            </div>
         </nav>
 
         <!-- Edit Itinerary Modal -->
-        <div id="edit-itinerary-modal" class="hidden fixed inset-0 bg-forest-900/40 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
-            <div class="bg-earth-50 w-full rounded-t-3xl p-6 shadow-2xl h-[85vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-6 sticky top-0 bg-earth-50 pb-2 z-10 border-b border-earth-100">
+        <div id="edit-itinerary-modal" class="hidden fixed inset-0 bg-forest-900/45 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
+            <div class="modal-sheet w-full rounded-t-[2rem] p-6 shadow-2xl h-[85vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 sticky top-0 modal-sheet pb-3 z-10 border-b border-earth-200">
                     <div>
-                        <h3 class="text-xl font-bold text-forest-700">Edit Plan</h3>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Itinerary</p>
+                        <h3 class="font-display text-3xl font-semibold text-forest-700">Edit Plan</h3>
                         <p id="edit-modal-subtitle" class="text-xs text-gray-500 font-medium"></p>
                     </div>
-                    <button onclick="closeEditItineraryModal()" class="text-gray-400 hover:text-forest-700 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <button onclick="closeEditItineraryModal()" class="text-forest-400 hover:text-forest-700 p-3 rounded-full bg-white border border-earth-200"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
-                
+
                 <form id="edit-itinerary-form" class="space-y-4" onsubmit="submitItineraryEdit(event)">
                     <input type="hidden" id="edit-date">
                     <input type="hidden" id="edit-period">
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Destination</label>
-                        <input type="text" id="edit-dest" placeholder="e.g. Vancouver DT" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Destination</label>
+                        <input type="text" id="edit-dest" placeholder="e.g. Vancouver DT" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Activities & Reservations</label>
-                        <textarea id="edit-act" rows="3" placeholder="What's the plan?" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 resize-none"></textarea>
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Activities & Reservations</label>
+                        <textarea id="edit-act" rows="3" placeholder="What's the plan?" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 resize-none shadow-sm"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Address</label>
-                        <textarea id="edit-addr" rows="2" placeholder="Location address" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 resize-none"></textarea>
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Address</label>
+                        <textarea id="edit-addr" rows="2" placeholder="Location address" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 resize-none shadow-sm"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Link</label>
-                        <input type="url" id="edit-link" placeholder="https://" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Link</label>
+                        <input type="url" id="edit-link" placeholder="https://" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Note</label>
-                        <textarea id="edit-note" rows="2" placeholder="Any special notes?" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 resize-none"></textarea>
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Note</label>
+                        <textarea id="edit-note" rows="2" placeholder="Any special notes?" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 resize-none shadow-sm"></textarea>
                     </div>
-                    
-                    <button type="submit" id="edit-submit-btn" class="w-full bg-forest-500 text-white font-semibold rounded-xl py-4 mt-6 shadow-lg hover:bg-forest-700 transition active:scale-95 flex justify-center items-center mb-8">
+
+                    <button type="submit" id="edit-submit-btn" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 mt-6 shadow-lg hover:opacity-95 transition active:scale-95 flex justify-center items-center mb-8">
                         <span>Save Changes</span>
                     </button>
                 </form>
@@ -193,17 +269,20 @@
         </div>
 
         <!-- Add Expense Modal -->
-        <div id="expense-modal" class="hidden fixed inset-0 bg-forest-900/40 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
-            <div class="bg-earth-50 w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-0">
+        <div id="expense-modal" class="hidden fixed inset-0 bg-forest-900/45 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
+            <div class="modal-sheet w-full rounded-t-[2rem] p-6 shadow-2xl transform transition-transform translate-y-0">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-forest-700">New Expense</h3>
-                    <button onclick="closeExpenseModal()" class="text-gray-400 hover:text-forest-700 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Expense</p>
+                        <h3 class="font-display text-3xl font-semibold text-forest-700">New Expense</h3>
+                    </div>
+                    <button onclick="closeExpenseModal()" class="text-forest-400 hover:text-forest-700 p-3 rounded-full bg-white border border-earth-200"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
-                
+
                 <form id="expense-form" class="space-y-4" onsubmit="submitExpense(event)">
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Category</label>
-                        <select id="exp-category" required class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 focus:ring-1 focus:ring-forest-500">
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Category</label>
+                        <select id="exp-category" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 focus:ring-1 focus:ring-forest-500 shadow-sm">
                             <option value="" disabled selected>Select category</option>
                             <option value="Hotel">🏨 Hotel</option>
                             <option value="Transport">🚗 Transport</option>
@@ -214,30 +293,30 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Item Name</label>
-                        <input type="text" id="exp-name" required placeholder="e.g. Dinner @ Keg" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Item Name</label>
+                        <input type="text" id="exp-name" required placeholder="e.g. Dinner @ Keg" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-forest-700 mb-1">Amount</label>
-                        <input type="number" step="0.01" id="exp-amount" required placeholder="0.00" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Amount</label>
+                        <input type="number" step="0.01" id="exp-amount" required placeholder="0.00" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-forest-700 mb-1">Pay By</label>
-                            <select id="exp-payby" required class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                            <label class="block text-sm font-semibold text-forest-700 mb-1">Pay By</label>
+                            <select id="exp-payby" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                                 <option value="Me">Me</option>
                                 <option value="Friend A">Friend A</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-forest-700 mb-1">Share With</label>
-                            <select id="exp-participants" required class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                            <label class="block text-sm font-semibold text-forest-700 mb-1">Share With</label>
+                            <select id="exp-participants" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                                 <option value="All">All</option>
                                 <option value="Individual">Individual</option>
                             </select>
                         </div>
                     </div>
-                    <button type="submit" id="exp-submit-btn" class="w-full bg-forest-500 text-white font-semibold rounded-xl py-4 mt-4 shadow-lg hover:bg-forest-700 transition active:scale-95 flex justify-center items-center mb-8">
+                    <button type="submit" id="exp-submit-btn" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 mt-4 shadow-lg hover:opacity-95 transition active:scale-95 flex justify-center items-center mb-8">
                         <span>Save Record</span>
                     </button>
                 </form>
@@ -247,7 +326,7 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg text-sm transition-opacity duration-300 opacity-0 pointer-events-none z-[200]">
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-forest-900 text-white px-4 py-2 rounded-full shadow-lg text-sm transition-opacity duration-300 opacity-0 pointer-events-none z-[200]">
         Action successful!
     </div>
 
@@ -266,7 +345,7 @@
             e.preventDefault();
             const input = document.getElementById('password-input').value;
             const errorMsg = document.getElementById('login-error');
-            
+
             if (input === APP_PASSWORD) {
                 sessionStorage.setItem('isLoggedIn', 'true');
                 showMainApp();
@@ -279,7 +358,7 @@
         function showMainApp() {
             const loginScreen = document.getElementById('login-screen');
             const mainApp = document.getElementById('main-app');
-            
+
             loginScreen.style.opacity = '0';
             setTimeout(() => {
                 loginScreen.classList.add('hidden');
@@ -305,11 +384,11 @@
             document.getElementById(`view-${tabId}`).classList.add('fade-in');
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-forest-500');
-                btn.classList.add('text-gray-400');
+                btn.classList.remove('text-white', 'bg-forest-700', 'shadow-soft');
+                btn.classList.add('text-forest-500');
             });
-            event.currentTarget.classList.remove('text-gray-400');
-            event.currentTarget.classList.add('text-forest-500');
+            event.currentTarget.classList.remove('text-forest-500');
+            event.currentTarget.classList.add('text-white', 'bg-forest-700', 'shadow-soft');
         }
 
         function openExpenseModal() { document.getElementById('expense-modal').classList.remove('hidden'); }
@@ -338,7 +417,7 @@
             }
             document.body.removeChild(textArea);
         }
-        
+
         function preventProp(e) {
             e.stopPropagation();
         }
@@ -353,7 +432,7 @@
             }
             return new Date(dateStr).getTime() || 0;
         }
-        
+
         function formatShortDate(dateStr) {
              if (!dateStr) return '';
              if (typeof dateStr === 'string' && dateStr.includes('/')) {
@@ -381,14 +460,14 @@
             try {
                 if(force) document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1"></i>Force syncing...';
                 else document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1"></i>Syncing...';
-                
+
                 const response = await fetch(GAS_WEBAPP_URL);
                 const data = await response.json();
                 appData = data;
                 localStorage.setItem('travelAppData', JSON.stringify(appData));
                 renderAllData();
-                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-check-circle mr-1 text-green-400"></i>Up to date';
-                setTimeout(() => { document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-cloud text-forest-100 mr-1"></i>Cloud sync active'; }, 3000);
+                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-check-circle mr-1 text-green-300"></i>Up to date';
+                setTimeout(() => { document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-cloud text-earth-100 mr-1"></i>Cloud sync active'; }, 3000);
             } catch (error) {
                 console.error("Fetch error:", error);
                 document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-wifi mr-1 text-red-300"></i>Offline mode';
@@ -399,20 +478,20 @@
             if (!str) return '';
             const names = str.split(',').map(n => n.trim()).filter(n => n);
             return names.map(name => {
-                let bg = 'bg-gray-100', text = 'text-gray-600';
+                let bg = 'bg-earth-100', text = 'text-forest-600';
                 if (name === 'PWS') { bg = 'bg-yellow-100'; text = 'text-yellow-800'; }
                 else if (name === 'KCW') { bg = 'bg-blue-100'; text = 'text-blue-800'; }
                 else if (name === 'CHM') { bg = 'bg-pink-100'; text = 'text-pink-800'; }
                 else if (name === 'FST') { bg = 'bg-gray-200'; text = 'text-gray-800'; }
                 else if (name === 'KCH') { bg = 'bg-[#E6D5C3]'; text = 'text-[#5C4033]'; } 
-                
+
                 return `<span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mr-1 mb-1 ${bg} ${text}">${name}</span>`;
             }).join('');
         }
 
         function renderAllData() {
             renderItineraryTab();
-            
+
             // Accommodation
             const accContainer = document.getElementById('view-accommodation');
             let sortedAcc = [];
@@ -433,16 +512,16 @@
                 const link = item['Link'] || '';
 
                 return `
-                <div class="bg-white rounded-2xl shadow-sm border border-earth-100 overflow-hidden mb-4">
-                    <div class="bg-forest-50 px-4 py-2 flex justify-between items-center border-b border-forest-100">
-                        <span class="text-sm font-bold text-forest-700"><i class="fa-regular fa-calendar-check mr-1"></i>${checkDate || 'TBD'}</span>
-                        ${nights ? `<span class="text-xs font-medium text-forest-500 bg-white px-2 py-1 rounded-md shadow-sm">🌙 ${nights}</span>` : ''}
+                <div class="luxury-card rounded-[1.5rem] shadow-soft overflow-hidden mb-4">
+                    <div class="luxury-bg px-4 py-3 flex justify-between items-center">
+                        <span class="text-sm font-bold text-earth-50"><i class="fa-regular fa-calendar-check mr-1 text-earth-300"></i>${checkDate || 'TBD'}</span>
+                        ${nights ? `<span class="text-xs font-semibold text-forest-700 bg-earth-50 px-3 py-1.5 rounded-full shadow-sm">🌙 ${nights}</span>` : ''}
                     </div>
                     <div class="p-4">
-                        ${location ? `<p class="text-xs text-gray-500 mb-1 uppercase tracking-wide"><i class="fa-solid fa-location-dot mr-1"></i>${location}</p>` : ''}
-                        <h3 class="text-xl font-bold text-forest-900 mb-3">${hotelName}</h3>
-                        <div class="flex bg-earth-50 rounded-xl p-3 mb-4 text-sm border border-earth-100">
-                            <div class="flex-1 text-center border-r border-earth-100">
+                        ${location ? `<p class="text-[10px] text-forest-400 mb-1 uppercase tracking-[0.18em] font-bold"><i class="fa-solid fa-location-dot mr-1"></i>${location}</p>` : ''}
+                        <h3 class="font-display text-2xl font-semibold text-forest-900 mb-4 leading-tight">${hotelName}</h3>
+                        <div class="flex bg-earth-50 rounded-2xl p-3 mb-4 text-sm border border-earth-200">
+                            <div class="flex-1 text-center border-r border-earth-200">
                                 <p class="text-xs text-gray-500 mb-1">Check-in</p>
                                 <p class="font-semibold text-forest-700"><i class="fa-solid fa-arrow-right-to-bracket mr-1 opacity-70"></i>${checkInTime}</p>
                             </div>
@@ -454,10 +533,10 @@
                         ${address ? `<div class="mb-4"><p class="text-xs text-gray-500 mb-1">Address</p><p class="text-sm text-gray-700 leading-snug">${address}</p></div>` : ''}
                         <div class="flex flex-wrap gap-2">
                             ${address ? `
-                            <button onclick="copyToClipboard('${address.replace(/'/g, "\\'")}', event)" class="flex-1 bg-white border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-50 transition flex justify-center items-center"><i class="fa-regular fa-copy mr-2"></i> Copy</button>
-                            <a href="https://maps.google.com/?q=${encodeURIComponent(address)}" target="_blank" class="flex-1 bg-forest-50 border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-100 transition flex justify-center items-center"><i class="fa-solid fa-map mr-2"></i> Map</a>
+                            <button onclick="copyToClipboard('${address.replace(/'/g, "\\'")}', event)" class="flex-1 bg-white border border-earth-200 text-forest-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-earth-50 transition flex justify-center items-center"><i class="fa-regular fa-copy mr-2"></i> Copy</button>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent(address)}" target="_blank" class="flex-1 bg-earth-50 border border-earth-200 text-forest-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-earth-100 transition flex justify-center items-center"><i class="fa-solid fa-map mr-2"></i> Map</a>
                             ` : ''}
-                            ${link ? `<a href="${link}" target="_blank" class="w-full mt-2 bg-forest-500 text-white py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-forest-600 transition flex justify-center items-center"><i class="fa-solid fa-link mr-2"></i> View Booking</a>` : ''}
+                            ${link ? `<a href="${link}" target="_blank" class="w-full mt-2 luxury-bg text-white py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:opacity-95 transition flex justify-center items-center"><i class="fa-solid fa-link mr-2"></i> View Booking</a>` : ''}
                         </div>
                     </div>
                 </div>`;
@@ -467,9 +546,9 @@
             const expContainer = document.getElementById('expenses-list');
             const sortedExp = [...appData.expenses].reverse();
             expContainer.innerHTML = sortedExp.map(item => `
-                <div class="bg-earth-50 rounded-2xl p-4 shadow-sm border border-earth-100 flex justify-between items-center">
+                <div class="luxury-card rounded-[1.35rem] p-4 flex justify-between items-center">
                     <div class="flex items-center">
-                        <div class="bg-forest-50 text-forest-500 w-10 h-10 rounded-full flex justify-center items-center mr-3 text-lg">${getCategoryIcon(item['Category'] || item['Category'])}</div>
+                        <div class="bg-earth-100 text-forest-700 w-11 h-11 rounded-2xl flex justify-center items-center mr-3 text-lg shadow-sm">${getCategoryIcon(item['Category'] || item['Category'])}</div>
                         <div><h4 class="font-semibold text-forest-900 text-sm">${item['Item / Description'] || item['Item'] || 'Expense'}</h4><p class="text-[11px] text-gray-500">${item['Paid By'] || ''} paid</p></div>
                     </div>
                     <div class="text-right"><p class="font-bold text-forest-700">$${item['Total Cost (CAD)'] || item['Amount'] || 0}</p></div>
@@ -479,78 +558,80 @@
             // Packing
             const packContainer = document.getElementById('view-packing');
             packContainer.innerHTML = appData.packing.map(item => `
-                <div class="flex items-center justify-between border-b border-forest-100 py-3 px-2">
-                    <div class="flex items-center gap-3"><input type="checkbox" ${item['Packed'] === true || item['Packed'] === 'TRUE' ? 'checked' : ''} class="w-5 h-5 text-forest-500 rounded border-gray-300 focus:ring-forest-500"><div><p class="font-medium text-forest-900 text-sm">${item['Item'] || 'Item'}</p><p class="text-[10px] text-forest-500 bg-forest-100 px-2 rounded-full inline-block mt-1">${item['Category'] || 'General'}</p></div></div>
+                <div class="luxury-card rounded-[1.25rem] flex items-center justify-between py-3.5 px-4">
+                    <div class="flex items-center gap-3"><input type="checkbox" ${item['Packed'] === true || item['Packed'] === 'TRUE' ? 'checked' : ''} class="w-5 h-5 text-forest-500 rounded border-earth-300 focus:ring-forest-500"><div><p class="font-semibold text-forest-900 text-sm">${item['Item'] || 'Item'}</p><p class="text-[10px] text-forest-600 bg-earth-100 px-2 py-0.5 rounded-full inline-block mt-1">${item['Category'] || 'General'}</p></div></div>
                     <span class="text-xs text-gray-400">x${item['Quantity'] || 1}</span>
                 </div>
             `).join('') || '<p class="text-center text-gray-400 mt-10">List is empty</p>';
         }
-        
+
         function renderItineraryTab() {
             if(!appData.itinerary || appData.itinerary.length === 0) {
                 document.getElementById('daily-itinerary-content').innerHTML = '<p class="text-center text-gray-400 mt-10">No plan data found. Check Google Sheet Tab Name or Date column.</p>';
                 return;
             }
-            
+
             const datesSet = new Set();
             appData.itinerary.forEach(item => {
                 if(item['Date']) datesSet.add(item['Date']);
             });
-            
+
             uniqueDays = Array.from(datesSet).sort((a, b) => parseDateForSort(a) - parseDateForSort(b));
-            
+
             if(!currentSelectedDate && uniqueDays.length > 0) {
                 currentSelectedDate = uniqueDays[0];
             }
-            
+
             renderCalendarStrip();
             renderSelectedDayContent();
         }
-        
+
         function renderCalendarStrip() {
             const strip = document.getElementById('calendar-strip');
             let html = '';
-            
+
             uniqueDays.forEach((dateStr, index) => {
                 const isSelected = dateStr === currentSelectedDate;
                 const shortDate = formatShortDate(dateStr);
                 const dayNum = index + 1;
-                
+
                 const btnClass = isSelected 
-                    ? 'bg-forest-700 text-white shadow-md transform scale-105' 
-                    : 'bg-white text-gray-500 border border-earth-100 hover:bg-earth-50';
-                
+                    ? 'luxury-bg text-white shadow-soft transform scale-105 border-transparent' 
+                    : 'bg-white/90 text-forest-600 border border-earth-200 hover:bg-earth-50 shadow-sm';
+
                 html += `
-                    <button onclick="selectItineraryDate('${dateStr}')" class="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-2xl transition-all duration-200 ${btnClass}">
-                        <span class="text-[10px] font-medium opacity-80 uppercase tracking-wider">Day ${dayNum}</span>
-                        <span class="font-bold text-sm mt-0.5 leading-tight">${shortDate}</span>
+                    <button onclick="selectItineraryDate('${dateStr}')" class="flex-shrink-0 flex flex-col items-center justify-center w-[4.6rem] h-[4.3rem] rounded-2xl transition-all duration-200 ${btnClass}">
+                        <span class="text-[10px] font-bold opacity-80 uppercase tracking-wider">Day ${dayNum}</span>
+                        <span class="font-semibold text-sm mt-0.5 leading-tight">${shortDate}</span>
                     </button>
                 `;
             });
             strip.innerHTML = html;
         }
-        
+
         function selectItineraryDate(dateStr) {
             currentSelectedDate = dateStr;
             renderCalendarStrip();
             renderSelectedDayContent();
         }
-        
+
         function renderSelectedDayContent() {
             const container = document.getElementById('daily-itinerary-content');
             const dayRecords = appData.itinerary.filter(item => item['Date'] === currentSelectedDate);
             const periods = ['Morning', 'Afternoon', 'Evening'];
             let html = '';
-            
+
+            html += `<div class="px-1 mb-2"><p class="text-[10px] uppercase tracking-[0.22em] text-forest-400 font-bold">${formatShortDate(currentSelectedDate)} • Day ${uniqueDays.indexOf(currentSelectedDate) + 1}</p></div>`;
+
             periods.forEach((period, index) => {
                 let record = dayRecords.find(item => String(item['Period']).trim() === period);
                 if (!record) record = { 'Period': period, 'Date': currentSelectedDate, 'isEmpty': true };
                 html += generateItineraryCard(record, index + 1);
             });
-            
+
             container.innerHTML = html;
         }
-        
+
         function generateItineraryCard(item, periodNum) {
             const period = item['Period'] || 'Period';
             const dest = item['Destination'] || '';
@@ -559,26 +640,26 @@
             const link = item['Link'] || '';
             const note = item['Note'] || '';
             const joining = item["Who's Joining"] || '';
-            
+
             // 還原為太陽、雲太陽、月亮 Icon 邏輯
             let icon = 'fa-sun';
             if (period === 'Afternoon') icon = 'fa-cloud-sun';
             if (period === 'Evening') icon = 'fa-moon';
-            
+
             const iconHtml = `
-                <div class="w-8 h-8 rounded-full bg-forest-50 text-forest-500 flex items-center justify-center text-sm mr-3 shrink-0">
+                <div class="w-11 h-11 rounded-2xl bg-earth-100 text-champagne flex items-center justify-center text-lg mr-3 shrink-0 shadow-sm">
                     <i class="fa-solid ${icon}"></i>
                 </div>
             `;
-            
+
             // Handle Empty State
             if (item.isEmpty || (!dest && !act)) {
                 return `
-                <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="bg-earth-50 border border-dashed border-gray-300 rounded-2xl p-4 flex items-center justify-center cursor-pointer hover:bg-earth-100 transition active:scale-95">
+                <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="soft-panel border-dashed rounded-[1.35rem] p-4 flex items-center justify-center cursor-pointer hover:bg-earth-100 transition active:scale-95">
                     <div class="flex items-center text-gray-400">
-                        ${iconHtml.replace('bg-forest-50', 'bg-gray-100').replace('text-forest-500', 'text-gray-400')}
+                        ${iconHtml.replace('text-champagne', 'text-gray-400')}
                         <div>
-                            <p class="font-medium text-sm text-left">${period}</p>
+                            <p class="font-semibold text-sm text-left">${period}</p>
                             <p class="text-xs">No plan yet. Click to add.</p>
                         </div>
                     </div>
@@ -588,44 +669,47 @@
 
             // Normal State
             return `
-            <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="bg-white rounded-2xl shadow-sm border border-earth-100 p-4 cursor-pointer hover:shadow-md transition active:scale-[0.98] relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-forest-500"></div>
-                
-                <div class="flex items-start mb-3">
+            <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="luxury-card ticket-edge rounded-[1.5rem] p-4 cursor-pointer hover:shadow-luxury transition active:scale-[0.98] relative overflow-hidden">
+                <div class="flex items-start mb-3 pl-2">
                     ${iconHtml}
-                    <div class="flex-1 mt-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-forest-500 bg-forest-50 px-2 py-0.5 rounded inline-block mb-1">${period}</span>
-                        <h3 class="text-lg font-bold text-forest-900 leading-tight">${dest || 'TBD'}</h3>
+                    <div class="flex-1 mt-0.5">
+                        <div class="flex justify-between items-start gap-3">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-[0.18em] text-forest-500 bg-earth-100 px-2 py-0.5 rounded-full inline-block mb-1">${period}</span>
+                                <h3 class="font-display text-[1.35rem] font-semibold text-forest-900 leading-tight">${dest || 'TBD'}</h3>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-xs text-forest-300 mt-3"></i>
+                        </div>
                     </div>
                 </div>
-                
-                ${act ? `<div class="mb-3 text-sm text-gray-700 whitespace-pre-line pl-11">${act}</div>` : ''}
-                
-                ${note ? `<div class="mb-3 text-xs text-gray-500 italic pl-11"><i class="fa-regular fa-comment-dots mr-1"></i>${note}</div>` : ''}
-                
-                <div class="pl-11 flex flex-wrap gap-2 mb-3">
+
+                ${act ? `<div class="mb-3 text-sm text-gray-700 leading-relaxed whitespace-pre-line pl-[4.2rem]">${act}</div>` : ''}
+
+                ${note ? `<div class="mb-3 text-xs text-gray-500 italic pl-[4.2rem]"><i class="fa-regular fa-comment-dots mr-1"></i>${note}</div>` : ''}
+
+                <div class="pl-[4.2rem] flex flex-wrap gap-2 mb-3">
                     ${addr ? `
-                        <button onclick="copyToClipboard('${addr.replace(/'/g, "\\'")}', event)" class="text-xs bg-earth-50 border border-earth-100 text-forest-700 py-1.5 px-3 rounded-lg font-medium hover:bg-earth-100 transition"><i class="fa-regular fa-copy mr-1"></i> Address</button>
-                        <a onclick="preventProp(event)" href="https://maps.google.com/?q=${encodeURIComponent(addr)}" target="_blank" class="text-xs bg-forest-50 border border-forest-100 text-forest-700 py-1.5 px-3 rounded-lg font-medium hover:bg-forest-100 transition"><i class="fa-solid fa-map mr-1"></i> Map</a>
+                        <button onclick="copyToClipboard('${addr.replace(/'/g, "\\'")}', event)" class="text-xs bg-white border border-earth-200 text-forest-700 py-1.5 px-3 rounded-xl font-semibold hover:bg-earth-50 transition"><i class="fa-regular fa-copy mr-1"></i> Address</button>
+                        <a onclick="preventProp(event)" href="https://maps.google.com/?q=${encodeURIComponent(addr)}" target="_blank" class="text-xs bg-earth-50 border border-earth-200 text-forest-700 py-1.5 px-3 rounded-xl font-semibold hover:bg-earth-100 transition"><i class="fa-solid fa-map mr-1"></i> Map</a>
                     ` : ''}
                     ${link ? `
-                        <a onclick="preventProp(event)" href="${link}" target="_blank" class="text-xs bg-forest-500 text-white py-1.5 px-3 rounded-lg font-medium hover:bg-forest-600 transition shadow-sm"><i class="fa-solid fa-link mr-1"></i> View Booking</a>
+                        <a onclick="preventProp(event)" href="${link}" target="_blank" class="text-xs bg-forest-700 text-white py-1.5 px-3 rounded-xl font-semibold hover:bg-forest-600 transition shadow-sm"><i class="fa-solid fa-link mr-1"></i> View Booking</a>
                     ` : ''}
                 </div>
-                
+
                 ${joining ? `
-                <div class="pl-11 pt-2 border-t border-earth-100 mt-2">
-                    <p class="text-[10px] text-gray-400 mb-1 uppercase">Who's joining</p>
+                <div class="pl-[4.2rem] pt-2 border-t border-earth-100 mt-2">
+                    <p class="text-[10px] text-gray-400 mb-1 uppercase tracking-[0.12em]">Who's joining</p>
                     <div class="flex flex-wrap">${getParticipantTags(joining)}</div>
                 </div>
                 ` : ''}
             </div>
             `;
         }
-        
+
         function openEditItineraryModal(item) {
             document.getElementById('edit-itinerary-modal').classList.remove('hidden');
-            
+
             document.getElementById('edit-modal-subtitle').innerText = `${item['Date']} • ${item['Period']}`;
             document.getElementById('edit-date').value = item['Date'] || currentSelectedDate;
             document.getElementById('edit-period').value = item['Period'] || '';
@@ -635,11 +719,11 @@
             document.getElementById('edit-link').value = item['Link'] || '';
             document.getElementById('edit-note').value = item['Note'] || '';
         }
-        
+
         function closeEditItineraryModal() {
             document.getElementById('edit-itinerary-modal').classList.add('hidden');
         }
-        
+
         async function submitItineraryEdit(e) {
             e.preventDefault();
             const btn = document.getElementById('edit-submit-btn');
@@ -661,7 +745,7 @@
                 if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
                 const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const json = await res.json();
-                
+
                 if(json.status === 'success') {
                     showToast('Plan Updated!');
                     closeEditItineraryModal();
@@ -704,10 +788,10 @@
             try {
                 if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
                 await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                
+
                 appData.expenses.push({ 'Category': payload.category, 'Item / Description': payload.itemName, 'Total Cost (CAD)': payload.amount, 'Paid By': payload.payBy });
                 renderAllData(); 
-                
+
                 document.getElementById('expense-form').reset(); closeExpenseModal(); fetchDataFromSheet();
             } catch (error) {
                 alert('Failed to upload.');
