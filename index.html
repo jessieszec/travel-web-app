@@ -35,8 +35,7 @@
             overflow-y: auto; 
             /* iOS 專屬：令 Scroll 變得極度順滑 (Momentum Scrolling) */
             -webkit-overflow-scrolling: touch; 
-            /* 預留空間給底部導航列及 iPhone 底部 Home Indicator (已大幅增加緩衝區解決遮擋問題) */
-            padding-bottom: calc(160px + env(safe-area-inset-bottom)); 
+            /* 已經移除有 Bug 嘅 CSS padding-bottom，改為喺 HTML 最底用實體透明方塊 */
         }
         
         /* 鎖死底部導航列，並避開 iPhone 底部黑條 */
@@ -125,6 +124,9 @@
 
             <!-- Packing List Tab -->
             <div id="view-packing" class="tab-view hidden space-y-4"></div>
+
+            <!-- 實體透明隱形方塊 (Spacer)：徹底解決 iOS Safari 忽略 padding 導致底部被遮擋的問題 -->
+            <div class="h-36 w-full shrink-0 pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);"></div>
         </main>
 
         <!-- Bottom Navigation (Fixed to perfectly anchor at bottom) -->
