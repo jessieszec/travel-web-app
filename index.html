@@ -213,15 +213,15 @@
                     <i class="fa-solid fa-route text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Plan</span>
                 </button>
-                <button onclick="switchTab('accommodation', 'Hotels', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                <button onclick="switchTab('accommodation', 'Hotels', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-bed text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Hotels</span>
                 </button>
-                <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-wallet text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Costs</span>
                 </button>
-                <button onclick="switchTab('packing', 'Pack', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                <button onclick="switchTab('packing', 'Pack', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-suitcase-rolling text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Pack</span>
                 </button>
@@ -392,7 +392,7 @@
                 btn.classList.add('text-forest-500');
             });
             clickedBtn.classList.remove('text-forest-500');
-            clickedBtn.classList.add('text-white', 'bg-forest-700', 'shadow-soft');
+            clickedBtn.classList.add('text-white', 'bg-forest-700', 'shadow-soft', 'rounded-2xl');
         }
 
         function openExpenseModal() { document.getElementById('expense-modal').classList.remove('hidden'); }
