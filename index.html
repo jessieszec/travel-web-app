@@ -33,10 +33,13 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="text-forest-900 antialiased selection:bg-forest-500 selection:text-white">
 
+    <!-- Login Screen -->
     <div id="login-screen" class="fixed inset-0 bg-forest-50 z-[100] flex flex-col justify-center items-center p-6 transition-opacity duration-300">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center border border-forest-100">
             <div class="w-16 h-16 bg-forest-100 text-forest-500 rounded-full flex justify-center items-center mx-auto mb-4 text-3xl">
@@ -55,18 +58,36 @@
         </div>
     </div>
 
+    <!-- Main App -->
     <div id="main-app" class="app-container max-w-md mx-auto bg-forest-50 relative shadow-2xl hidden opacity-0 transition-opacity duration-500">
         
-        <header class="bg-forest-700 text-white pt-12 pb-4 px-6 shadow-md z-10">
-            <h1 id="header-title" class="text-2xl font-semibold tracking-wide">Itinerary</h1>
-            <p id="sync-status" class="text-xs text-forest-100 mt-1"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
+        <header class="bg-forest-700 text-white pt-12 pb-4 px-6 shadow-md z-10 flex justify-between items-end">
+            <div>
+                <h1 id="header-title" class="text-2xl font-semibold tracking-wide">Plan</h1>
+                <p id="sync-status" class="text-xs text-forest-100 mt-1"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
+            </div>
+            <button onclick="fetchDataFromSheet(true)" class="text-forest-100 hover:text-white p-2">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
         </header>
 
         <main class="content-area p-5">
-            <div id="view-itinerary" class="tab-view space-y-4"></div>
+            <!-- Itinerary Tab -->
+            <div id="view-itinerary" class="tab-view space-y-4">
+                <!-- Calendar Strip -->
+                <div id="calendar-strip" class="flex space-x-3 overflow-x-auto hide-scroll pb-2 -mx-5 px-5">
+                    <!-- Days will be injected here -->
+                </div>
+                <!-- Daily Cards -->
+                <div id="daily-itinerary-content" class="space-y-4 mt-4">
+                    <p class="text-center text-gray-400 mt-10">Loading plan...</p>
+                </div>
+            </div>
             
+            <!-- Accommodation Tab -->
             <div id="view-accommodation" class="tab-view hidden space-y-4"></div>
             
+            <!-- Expenses Tab -->
             <div id="view-expenses" class="tab-view hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-lg font-semibold text-forest-700">Expenses</h2>
@@ -77,28 +98,74 @@
                 <div id="expenses-list" class="space-y-3"></div>
             </div>
 
+            <!-- Packing List Tab -->
             <div id="view-packing" class="tab-view hidden space-y-4"></div>
         </main>
 
+        <!-- Bottom Navigation -->
         <nav class="absolute bottom-0 w-full bg-white/80 backdrop-blur-md border-t border-forest-100 pb-safe pt-2 px-6 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
-            <button onclick="switchTab('itinerary', 'Itinerary')" class="nav-btn flex flex-col items-center p-2 text-forest-500 w-16">
+            <button onclick="switchTab('itinerary', 'Plan')" class="nav-btn flex flex-col items-center p-2 text-forest-500 w-16">
                 <i class="fa-solid fa-route text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">Plan</span>
             </button>
-            <button onclick="switchTab('accommodation', 'Accommodation')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
+            <button onclick="switchTab('accommodation', 'Hotels')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
                 <i class="fa-solid fa-bed text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">Hotels</span>
             </button>
-            <button onclick="switchTab('expenses', 'Expenses')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
+            <button onclick="switchTab('expenses', 'Costs')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
                 <i class="fa-solid fa-wallet text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">Costs</span>
             </button>
-            <button onclick="switchTab('packing', 'Packing List')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
+            <button onclick="switchTab('packing', 'Pack')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-forest-500 w-16 transition">
                 <i class="fa-solid fa-suitcase-rolling text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">Pack</span>
             </button>
         </nav>
 
+        <!-- Edit Itinerary Modal -->
+        <div id="edit-itinerary-modal" class="hidden fixed inset-0 bg-forest-900/40 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
+            <div class="bg-earth-50 w-full rounded-t-3xl p-6 shadow-2xl h-[85vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 sticky top-0 bg-earth-50 pb-2 z-10 border-b border-earth-100">
+                    <div>
+                        <h3 class="text-xl font-bold text-forest-700">Edit Plan</h3>
+                        <p id="edit-modal-subtitle" class="text-xs text-gray-500 font-medium"></p>
+                    </div>
+                    <button onclick="closeEditItineraryModal()" class="text-gray-400 hover:text-forest-700 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                
+                <form id="edit-itinerary-form" class="space-y-4" onsubmit="submitItineraryEdit(event)">
+                    <input type="hidden" id="edit-date">
+                    <input type="hidden" id="edit-period">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Destination</label>
+                        <input type="text" id="edit-dest" placeholder="e.g. Vancouver DT" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Activities & Reservations</label>
+                        <textarea id="edit-act" rows="3" placeholder="What's the plan?" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Address</label>
+                        <textarea id="edit-addr" rows="2" placeholder="Location address" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Link</label>
+                        <input type="url" id="edit-link" placeholder="https://" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-forest-700 mb-1">Note</label>
+                        <textarea id="edit-note" rows="2" placeholder="Any special notes?" class="w-full bg-white border border-forest-100 rounded-xl px-4 py-3 outline-none focus:border-forest-500 resize-none"></textarea>
+                    </div>
+                    
+                    <button type="submit" id="edit-submit-btn" class="w-full bg-forest-500 text-white font-semibold rounded-xl py-4 mt-6 shadow-lg hover:bg-forest-700 transition active:scale-95 flex justify-center items-center">
+                        <span>Save Changes</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Expense Modal -->
         <div id="expense-modal" class="hidden fixed inset-0 bg-forest-900/40 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
             <div class="bg-earth-50 w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-0">
                 <div class="flex justify-between items-center mb-6">
@@ -152,10 +219,12 @@
 
     </div>
 
+    <!-- Notification Toast -->
     <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg text-sm transition-opacity duration-300 opacity-0 pointer-events-none z-[200]">
-        Address copied!
+        Action successful!
     </div>
 
+    <!-- JavaScript -->
     <script>
         const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxjdAWsoFI1T-D62D_Wv4WwrF5fHaZuXyt57UGi2FzA2MIDGuBRnGprXDt6avdG8jgw2g/exec"; 
         const APP_PASSWORD = "123"; 
@@ -194,6 +263,8 @@
         }
 
         let appData = { itinerary: [], accommodation: [], expenses: [], packing: [] };
+        let uniqueDays = [];
+        let currentSelectedDate = '';
 
         function initializeApp() {
             loadCachedData();
@@ -224,36 +295,47 @@
             setTimeout(() => { toast.style.opacity = '0'; }, 2000);
         }
 
-        function copyToClipboard(text) {
+        function copyToClipboard(text, e) {
+            if(e) e.stopPropagation(); // 防止觸發卡片編輯
             const textArea = document.createElement("textarea");
             textArea.value = text;
             textArea.style.position = "fixed"; 
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            
             try {
-                const successful = document.execCommand('copy');
-                if(successful) {
-                    showToast('Address Copied!');
-                } else {
-                    showToast('Failed to copy');
-                }
+                document.execCommand('copy');
+                showToast('Address Copied!');
             } catch (err) {
                 showToast('Failed to copy');
             }
             document.body.removeChild(textArea);
+        }
+        
+        function preventProp(e) {
+            e.stopPropagation();
         }
 
         function parseDateForSort(dateStr) {
             if (!dateStr) return 0;
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
-                if (parts.length === 3) {
-                    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
-                }
+                if (parts.length === 3) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
             }
             return new Date(dateStr).getTime() || 0;
+        }
+        
+        // 格式化日期用作顯示標籤 (例如: 19 Aug)
+        function formatShortDate(dateStr) {
+             if (!dateStr) return '';
+             if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    const d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                }
+            }
+            return dateStr;
         }
 
         function loadCachedData() {
@@ -261,16 +343,15 @@
             if (cached) {
                 appData = JSON.parse(cached);
                 renderAllData();
-            } else {
-                appData.itinerary = [{ '日期': 'Day 1', '時間': '10:00 AM', '活動': 'Arrive', '地點': 'Airport' }];
-                renderAllData();
             }
         }
 
-        async function fetchDataFromSheet() {
+        async function fetchDataFromSheet(force = false) {
             if(!GAS_WEBAPP_URL.startsWith('http')) return;
             try {
-                document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1"></i>Syncing...';
+                if(force) document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1"></i>Force syncing...';
+                else document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin mr-1"></i>Syncing...';
+                
                 const response = await fetch(GAS_WEBAPP_URL);
                 const data = await response.json();
                 appData = data;
@@ -283,49 +364,42 @@
             }
         }
 
-        function renderAllData() {
-            // Itinerary
-            const itContainer = document.getElementById('view-itinerary');
-            itContainer.innerHTML = appData.itinerary.map(item => `
-                <div class="bg-earth-50 rounded-2xl p-4 shadow-sm border border-earth-100 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-forest-500"></div>
-                    <div>
-                        <span class="text-xs font-bold text-forest-500 bg-forest-100 px-2 py-1 rounded-md tracking-wider">${item['日期'] || 'N/A'}</span>
-                        <span class="text-xs text-gray-500 ml-2"><i class="fa-regular fa-clock mr-1"></i>${item['時間'] || ''}</span>
-                        <h3 class="text-lg font-bold text-forest-900 mt-2">${item['活動'] || 'Unnamed'}</h3>
-                    </div>
-                    ${item['地點'] ? `<a href="https://maps.google.com/?q=${encodeURIComponent(item['地點'])}" target="_blank" class="mt-3 inline-flex items-center text-sm text-forest-700 bg-forest-50 px-3 py-1.5 rounded-lg hover:bg-forest-100 transition"><i class="fa-solid fa-location-dot mr-2 text-forest-500"></i> ${item['地點']}</a>` : ''}
-                </div>
-            `).join('') || '<p class="text-center text-gray-400 mt-10">No itinerary data</p>';
+        // 幫人名上色
+        function getParticipantTags(str) {
+            if (!str) return '';
+            const names = str.split(',').map(n => n.trim()).filter(n => n);
+            return names.map(name => {
+                let bg = 'bg-gray-100', text = 'text-gray-600';
+                if (name === 'PWS') { bg = 'bg-yellow-100'; text = 'text-yellow-800'; }
+                else if (name === 'KCW') { bg = 'bg-blue-100'; text = 'text-blue-800'; }
+                else if (name === 'CHM') { bg = 'bg-pink-100'; text = 'text-pink-800'; }
+                else if (name === 'FST') { bg = 'bg-gray-200'; text = 'text-gray-800'; }
+                else if (name === 'KCH') { bg = 'bg-amber-100'; text = 'text-amber-900'; }
+                
+                return `<span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mr-1 mb-1 ${bg} ${text}">${name}</span>`;
+            }).join('');
+        }
 
+        function renderAllData() {
+            renderItineraryTab();
+            
             // Accommodation
             const accContainer = document.getElementById('view-accommodation');
             let sortedAcc = [];
             if(appData.accommodation && appData.accommodation.length > 0) {
-                sortedAcc = [...appData.accommodation].sort((a, b) => {
-                    return parseDateForSort(a['Check-date']) - parseDateForSort(b['Check-date']);
-                });
+                sortedAcc = [...appData.accommodation].sort((a, b) => parseDateForSort(a['Check-date']) - parseDateForSort(b['Check-date']));
             }
-
-            // Accommodation - Remove time from date
             accContainer.innerHTML = sortedAcc.map(item => {
                 const location = item['Location'] || '';
                 const hotelName = item['Hotel Name'] || 'Unknown Hotel';
                 const address = item['Address'] || '';
-                
-                // 這裡：將日期強制截取為 YYYY-MM-DD 格式
                 let rawDate = item['Check-date'] ? item['Check-date'].toString() : '';
                 const checkDate = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate; 
-                
                 const nights = item['Nights'] ? `${item['Nights']} Nights` : '';
-                
                 let checkInTime = item['Check-in Time'] || '--:--';
                 let checkOutTime = item['Check-out Time'] || '--:--';
-                
-                // 處理時間格式
                 if(checkInTime.length > 10 && checkInTime.includes('T')) checkInTime = new Date(checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 if(checkOutTime.length > 10 && checkOutTime.includes('T')) checkOutTime = new Date(checkOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
                 const link = item['Link'] || '';
 
                 return `
@@ -334,11 +408,9 @@
                         <span class="text-sm font-bold text-forest-700"><i class="fa-regular fa-calendar-check mr-1"></i>${checkDate || 'TBD'}</span>
                         ${nights ? `<span class="text-xs font-medium text-forest-500 bg-white px-2 py-1 rounded-md shadow-sm">🌙 ${nights}</span>` : ''}
                     </div>
-
                     <div class="p-4">
                         ${location ? `<p class="text-xs text-gray-500 mb-1 uppercase tracking-wide"><i class="fa-solid fa-location-dot mr-1"></i>${location}</p>` : ''}
                         <h3 class="text-xl font-bold text-forest-900 mb-3">${hotelName}</h3>
-                        
                         <div class="flex bg-earth-50 rounded-xl p-3 mb-4 text-sm border border-earth-100">
                             <div class="flex-1 text-center border-r border-earth-100">
                                 <p class="text-xs text-gray-500 mb-1">Check-in</p>
@@ -349,32 +421,16 @@
                                 <p class="font-semibold text-forest-700"><i class="fa-solid fa-arrow-right-from-bracket mr-1 opacity-70"></i>${checkOutTime}</p>
                             </div>
                         </div>
-
-                        ${address ? `
-                        <div class="mb-4">
-                            <p class="text-xs text-gray-500 mb-1">Address</p>
-                            <p class="text-sm text-gray-700 leading-snug">${address}</p>
-                        </div>
-                        ` : ''}
-                        
+                        ${address ? `<div class="mb-4"><p class="text-xs text-gray-500 mb-1">Address</p><p class="text-sm text-gray-700 leading-snug">${address}</p></div>` : ''}
                         <div class="flex flex-wrap gap-2">
                             ${address ? `
-                            <button onclick="copyToClipboard('${address.replace(/'/g, "\\'")}')" class="flex-1 bg-white border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-50 transition flex justify-center items-center">
-                                <i class="fa-regular fa-copy mr-2"></i> Copy
-                            </button>
-                            <a href="https://maps.google.com/?q=${encodeURIComponent(address)}" target="_blank" class="flex-1 bg-forest-50 border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-100 transition flex justify-center items-center">
-                                <i class="fa-solid fa-map mr-2"></i> Map
-                            </a>
+                            <button onclick="copyToClipboard('${address.replace(/'/g, "\\'")}', event)" class="flex-1 bg-white border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-50 transition flex justify-center items-center"><i class="fa-regular fa-copy mr-2"></i> Copy</button>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent(address)}" target="_blank" class="flex-1 bg-forest-50 border border-forest-100 text-forest-700 py-2 rounded-lg text-sm font-medium hover:bg-forest-100 transition flex justify-center items-center"><i class="fa-solid fa-map mr-2"></i> Map</a>
                             ` : ''}
-                            ${link ? `
-                            <a href="${link}" target="_blank" class="w-full mt-2 bg-forest-500 text-white py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-forest-600 transition flex justify-center items-center">
-                                <i class="fa-solid fa-link mr-2"></i> View Booking
-                            </a>
-                            ` : ''}
+                            ${link ? `<a href="${link}" target="_blank" class="w-full mt-2 bg-forest-500 text-white py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-forest-600 transition flex justify-center items-center"><i class="fa-solid fa-link mr-2"></i> View Booking</a>` : ''}
                         </div>
                     </div>
-                </div>
-                `;
+                </div>`;
             }).join('') || '<p class="text-center text-gray-400 mt-10">No accommodation found</p>';
 
             // Expenses
@@ -383,10 +439,10 @@
             expContainer.innerHTML = sortedExp.map(item => `
                 <div class="bg-earth-50 rounded-2xl p-4 shadow-sm border border-earth-100 flex justify-between items-center">
                     <div class="flex items-center">
-                        <div class="bg-forest-50 text-forest-500 w-10 h-10 rounded-full flex justify-center items-center mr-3 text-lg">${getCategoryIcon(item['種類'] || item['Category'])}</div>
-                        <div><h4 class="font-semibold text-forest-900 text-sm">${item['項目名稱'] || item['Item'] || 'Expense'}</h4><p class="text-[11px] text-gray-500">${item['由誰支付'] || ''} paid • Share: ${item['參與者'] || ''}</p></div>
+                        <div class="bg-forest-50 text-forest-500 w-10 h-10 rounded-full flex justify-center items-center mr-3 text-lg">${getCategoryIcon(item['Category'] || item['Category'])}</div>
+                        <div><h4 class="font-semibold text-forest-900 text-sm">${item['Item / Description'] || item['Item'] || 'Expense'}</h4><p class="text-[11px] text-gray-500">${item['Paid By'] || ''} paid</p></div>
                     </div>
-                    <div class="text-right"><p class="font-bold text-forest-700">$${item['金額'] || item['Amount'] || 0}</p></div>
+                    <div class="text-right"><p class="font-bold text-forest-700">$${item['Total Cost (CAD)'] || item['Amount'] || 0}</p></div>
                 </div>
             `).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
 
@@ -394,19 +450,226 @@
             const packContainer = document.getElementById('view-packing');
             packContainer.innerHTML = appData.packing.map(item => `
                 <div class="flex items-center justify-between border-b border-forest-100 py-3 px-2">
-                    <div class="flex items-center gap-3"><input type="checkbox" class="w-5 h-5 text-forest-500 rounded border-gray-300 focus:ring-forest-500"><div><p class="font-medium text-forest-900 text-sm">${item['項目'] || item['Item'] || 'Item'}</p><p class="text-[10px] text-forest-500 bg-forest-100 px-2 rounded-full inline-block mt-1">${item['種類'] || item['Category'] || 'General'}</p></div></div>
-                    <span class="text-xs text-gray-400">x${item['數量'] || item['Quantity'] || 1}</span>
+                    <div class="flex items-center gap-3"><input type="checkbox" ${item['Packed'] === true || item['Packed'] === 'TRUE' ? 'checked' : ''} class="w-5 h-5 text-forest-500 rounded border-gray-300 focus:ring-forest-500"><div><p class="font-medium text-forest-900 text-sm">${item['Item'] || 'Item'}</p><p class="text-[10px] text-forest-500 bg-forest-100 px-2 rounded-full inline-block mt-1">${item['Category'] || 'General'}</p></div></div>
+                    <span class="text-xs text-gray-400">x${item['Quantity'] || 1}</span>
                 </div>
             `).join('') || '<p class="text-center text-gray-400 mt-10">List is empty</p>';
         }
+        
+        // --- ITINERARY SPECIFIC LOGIC ---
+        function renderItineraryTab() {
+            if(!appData.itinerary || appData.itinerary.length === 0) {
+                document.getElementById('daily-itinerary-content').innerHTML = '<p class="text-center text-gray-400 mt-10">No plan data found</p>';
+                return;
+            }
+            
+            // Extract unique dates
+            const datesSet = new Set();
+            appData.itinerary.forEach(item => {
+                if(item['Date']) datesSet.add(item['Date']);
+            });
+            
+            // Sort unique dates
+            uniqueDays = Array.from(datesSet).sort((a, b) => parseDateForSort(a) - parseDateForSort(b));
+            
+            // Set default selected date if none
+            if(!currentSelectedDate && uniqueDays.length > 0) {
+                currentSelectedDate = uniqueDays[0];
+            }
+            
+            renderCalendarStrip();
+            renderSelectedDayContent();
+        }
+        
+        function renderCalendarStrip() {
+            const strip = document.getElementById('calendar-strip');
+            let html = '';
+            
+            uniqueDays.forEach((dateStr, index) => {
+                const isSelected = dateStr === currentSelectedDate;
+                const shortDate = formatShortDate(dateStr);
+                const dayNum = index + 1;
+                
+                const btnClass = isSelected 
+                    ? 'bg-forest-700 text-white shadow-md transform scale-105' 
+                    : 'bg-white text-gray-500 border border-earth-100 hover:bg-earth-50';
+                
+                html += `
+                    <button onclick="selectItineraryDate('${dateStr}')" class="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-2xl transition-all duration-200 ${btnClass}">
+                        <span class="text-[10px] font-medium opacity-80 uppercase tracking-wider">Day ${dayNum}</span>
+                        <span class="font-bold text-sm mt-0.5 leading-tight">${shortDate}</span>
+                    </button>
+                `;
+            });
+            strip.innerHTML = html;
+        }
+        
+        function selectItineraryDate(dateStr) {
+            currentSelectedDate = dateStr;
+            renderCalendarStrip();
+            renderSelectedDayContent();
+        }
+        
+        function renderSelectedDayContent() {
+            const container = document.getElementById('daily-itinerary-content');
+            
+            // Filter records for this day
+            const dayRecords = appData.itinerary.filter(item => item['Date'] === currentSelectedDate);
+            
+            // Expected periods
+            const periods = ['Morning', 'Afternoon', 'Evening'];
+            let html = '';
+            
+            periods.forEach((period, index) => {
+                // Find record for this period, or create empty template
+                let record = dayRecords.find(item => String(item['Period']).trim() === period);
+                
+                if (!record) {
+                    record = { 'Period': period, 'Date': currentSelectedDate, 'isEmpty': true };
+                }
+                
+                html += generateItineraryCard(record, index + 1);
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function generateItineraryCard(item, periodNum) {
+            const period = item['Period'] || 'Period';
+            const dest = item['Destination'] || '';
+            const act = item['Activities & Reservations'] || '';
+            const addr = item['Address'] || '';
+            const link = item['Link'] || '';
+            const note = item['Note'] || '';
+            const joining = item["Who's Joining"] || '';
+            
+            let icon = 'fa-sun';
+            if (period === 'Afternoon') icon = 'fa-cloud-sun';
+            if (period === 'Evening') icon = 'fa-moon';
+            
+            // Handle Empty State
+            if (item.isEmpty || (!dest && !act)) {
+                return `
+                <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="bg-earth-50 border border-dashed border-gray-300 rounded-2xl p-4 flex items-center justify-center cursor-pointer hover:bg-earth-100 transition active:scale-95">
+                    <div class="text-center text-gray-400">
+                        <i class="fa-solid ${icon} text-2xl mb-2 opacity-50"></i>
+                        <p class="font-medium text-sm">${period}</p>
+                        <p class="text-xs mt-1">No plan yet. Click to add.</p>
+                    </div>
+                </div>
+                `;
+            }
+
+            // Normal State
+            return `
+            <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="bg-white rounded-2xl shadow-sm border border-earth-100 p-4 cursor-pointer hover:shadow-md transition active:scale-[0.98] relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-forest-500"></div>
+                
+                <!-- Period & Destination -->
+                <div class="flex items-start mb-3">
+                    <div class="w-8 h-8 rounded-full bg-forest-50 text-forest-500 flex items-center justify-center text-sm mr-3 shrink-0">
+                        <i class="fa-solid ${icon}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-forest-500 bg-forest-50 px-2 py-0.5 rounded inline-block mb-1">${period}</span>
+                        <h3 class="text-lg font-bold text-forest-900 leading-tight">${dest || 'TBD'}</h3>
+                    </div>
+                </div>
+                
+                <!-- Activities -->
+                ${act ? `<div class="mb-3 text-sm text-gray-700 whitespace-pre-line pl-11">${act}</div>` : ''}
+                
+                <!-- Note -->
+                ${note ? `<div class="mb-3 text-xs text-gray-500 italic pl-11"><i class="fa-regular fa-comment-dots mr-1"></i>${note}</div>` : ''}
+                
+                <!-- Buttons -->
+                <div class="pl-11 flex flex-wrap gap-2 mb-3">
+                    ${addr ? `
+                        <button onclick="copyToClipboard('${addr.replace(/'/g, "\\'")}', event)" class="text-xs bg-earth-50 border border-earth-100 text-forest-700 py-1.5 px-3 rounded-lg font-medium hover:bg-earth-100 transition"><i class="fa-regular fa-copy mr-1"></i> Address</button>
+                        <a onclick="preventProp(event)" href="https://maps.google.com/?q=${encodeURIComponent(addr)}" target="_blank" class="text-xs bg-forest-50 border border-forest-100 text-forest-700 py-1.5 px-3 rounded-lg font-medium hover:bg-forest-100 transition"><i class="fa-solid fa-map mr-1"></i> Map</a>
+                    ` : ''}
+                    ${link ? `
+                        <a onclick="preventProp(event)" href="${link}" target="_blank" class="text-xs bg-forest-500 text-white py-1.5 px-3 rounded-lg font-medium hover:bg-forest-600 transition shadow-sm"><i class="fa-solid fa-link mr-1"></i> View</a>
+                    ` : ''}
+                </div>
+                
+                <!-- Who's joining -->
+                ${joining ? `
+                <div class="pl-11 pt-2 border-t border-earth-100 mt-2">
+                    <p class="text-[10px] text-gray-400 mb-1 uppercase">Who's joining</p>
+                    <div class="flex flex-wrap">${getParticipantTags(joining)}</div>
+                </div>
+                ` : ''}
+            </div>
+            `;
+        }
+        
+        // --- EDIT ITINERARY MODAL ---
+        function openEditItineraryModal(item) {
+            document.getElementById('edit-itinerary-modal').classList.remove('hidden');
+            
+            document.getElementById('edit-modal-subtitle').innerText = `${item['Date']} • ${item['Period']}`;
+            
+            document.getElementById('edit-date').value = item['Date'] || currentSelectedDate;
+            document.getElementById('edit-period').value = item['Period'] || '';
+            
+            document.getElementById('edit-dest').value = item['Destination'] || '';
+            document.getElementById('edit-act').value = item['Activities & Reservations'] || '';
+            document.getElementById('edit-addr').value = item['Address'] || '';
+            document.getElementById('edit-link').value = item['Link'] || '';
+            document.getElementById('edit-note').value = item['Note'] || '';
+        }
+        
+        function closeEditItineraryModal() {
+            document.getElementById('edit-itinerary-modal').classList.add('hidden');
+        }
+        
+        async function submitItineraryEdit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('edit-submit-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; 
+            btn.disabled = true;
+
+            const payload = {
+                action: 'updateItinerary',
+                date: document.getElementById('edit-date').value,
+                period: document.getElementById('edit-period').value,
+                destination: document.getElementById('edit-dest').value,
+                activities: document.getElementById('edit-act').value,
+                address: document.getElementById('edit-addr').value,
+                link: document.getElementById('edit-link').value,
+                note: document.getElementById('edit-note').value
+            };
+
+            try {
+                if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
+                const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const json = await res.json();
+                
+                if(json.status === 'success') {
+                    showToast('Plan Updated!');
+                    closeEditItineraryModal();
+                    // 強制從 Google Sheet 拿最新資料以刷新畫面
+                    fetchDataFromSheet(true); 
+                } else {
+                    alert('Update failed: ' + json.message);
+                }
+            } catch (error) {
+                alert('Network error. Check console.');
+            } finally {
+                btn.innerHTML = '<span>Save Changes</span>'; 
+                btn.disabled = false;
+            }
+        }
+        // -----------------------------
 
         function getCategoryIcon(cat) {
             if(!cat) return '<i class="fa-solid fa-receipt"></i>';
-            if(cat.includes('Hotel') || cat.includes('酒店')) return '🏨';
-            if(cat.includes('Transport') || cat.includes('車')) return '🚗';
-            if(cat.includes('Food') || cat.includes('食')) return '🍽️';
-            if(cat.includes('Groceries') || cat.includes('餸')) return '🛒';
-            if(cat.includes('Ticket') || cat.includes('門票')) return '🎟️';
+            if(cat.includes('Hotel')) return '🏨';
+            if(cat.includes('Transport')) return '🚗';
+            if(cat.includes('Food') || cat.includes('Meal') || cat.includes('Dining')) return '🍽️';
+            if(cat.includes('Groceries')) return '🛒';
+            if(cat.includes('Ticket')) return '🎟️';
             return '📌';
         }
 
@@ -428,12 +691,13 @@
                 if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
                 await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
                 
-                appData.expenses.push({ 'Date': 'Just now', 'Category': payload.category, 'Item': payload.itemName, 'Amount': payload.amount, 'Paid By': payload.payBy, 'Share': payload.participants });
-                renderAllData(); localStorage.setItem('travelAppData', JSON.stringify(appData));
+                // Optimistic UI update
+                appData.expenses.push({ 'Category': payload.category, 'Item / Description': payload.itemName, 'Total Cost (CAD)': payload.amount, 'Paid By': payload.payBy });
+                renderAllData(); 
                 
                 document.getElementById('expense-form').reset(); closeExpenseModal(); fetchDataFromSheet();
             } catch (error) {
-                alert('Failed to upload. Check network or script URL.');
+                alert('Failed to upload.');
             } finally {
                 btn.innerHTML = '<span>Save Record</span>'; btn.disabled = false;
             }
