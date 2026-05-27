@@ -199,12 +199,23 @@
                     </div>
                     <div class="mt-4 flex items-center justify-between gap-3">
                         <div>
-                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Total Cost</p>
+                            <p id="expenses-total-label" class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Total Cost</p>
                             <p id="expenses-total" class="font-display text-3xl font-semibold text-forest-900 mt-0.5">$0</p>
                         </div>
                         <div class="bg-white/80 border border-earth-200 rounded-full p-1 flex text-xs font-semibold shadow-sm">
                             <button id="currency-cad-btn" onclick="setExpenseCurrency('CAD')" class="currency-btn px-3 py-1.5 rounded-full bg-forest-700 text-white">CAD</button>
                             <button id="currency-hkd-btn" onclick="setExpenseCurrency('HKD')" class="currency-btn px-3 py-1.5 rounded-full text-forest-600">HKD</button>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold mb-2">View By Person</p>
+                        <div id="expense-person-filter" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
+                            <button id="person-filter-all" onclick="setExpensePersonFilter(null)" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-forest-700 text-white shadow-sm">All</button>
+                            <button id="person-filter-PWS" onclick="setExpensePersonFilter('PWS')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">PWS</button>
+                            <button id="person-filter-KCW" onclick="setExpensePersonFilter('KCW')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">KCW</button>
+                            <button id="person-filter-FST" onclick="setExpensePersonFilter('FST')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">FST</button>
+                            <button id="person-filter-KCH" onclick="setExpensePersonFilter('KCH')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">KCH</button>
+                            <button id="person-filter-CHM" onclick="setExpensePersonFilter('CHM')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">CHM</button>
                         </div>
                     </div>
                     <div id="expenses-category-summary" class="mt-4 space-y-2"></div>
@@ -428,6 +439,7 @@
         let uniqueDays = [];
         let currentSelectedDate = '';
         let currentExpenseCurrency = 'CAD';
+        let currentExpensePerson = null;
         const EXPENSE_PEOPLE = ['PWS', 'KCW', 'FST', 'KCH', 'CHM'];
         const CAD_TO_HKD_RATE = 5.7;
         let editingExpenseRowNumber = null;
@@ -509,6 +521,24 @@
             renderAllData();
         }
 
+        function setExpensePersonFilter(person) {
+            currentExpensePerson = person;
+
+            document.querySelectorAll('.person-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-forest-700', 'text-white');
+                btn.classList.add('bg-white', 'border', 'border-earth-200', 'text-forest-600');
+            });
+
+            const activeId = person ? `person-filter-${person}` : 'person-filter-all';
+            const activeBtn = document.getElementById(activeId);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white', 'border', 'border-earth-200', 'text-forest-600');
+                activeBtn.classList.add('bg-forest-700', 'text-white');
+            }
+
+            renderAllData();
+        }
+
         function parseMoney(value) {
             if (value === null || value === undefined || value === '') return 0;
             if (typeof value === 'number') return value;
@@ -523,6 +553,11 @@
         }
 
         function getExpenseAmount(item) {
+            if (currentExpensePerson) {
+                const personalHeader = currentExpenseCurrency === 'HKD' ? `${currentExpensePerson}$HK` : `${currentExpensePerson}$`;
+                return parseMoney(item[personalHeader]);
+            }
+
             if (currentExpenseCurrency === 'HKD') {
                 const hkd = parseMoney(item['Total Cost (HKD)']);
                 if (hkd) return hkd;
@@ -540,8 +575,13 @@
 
         function renderExpenseSummary(expenses) {
             const totalEl = document.getElementById('expenses-total');
+            const totalLabelEl = document.getElementById('expenses-total-label');
             const summaryEl = document.getElementById('expenses-category-summary');
             if (!totalEl || !summaryEl) return;
+
+            if (totalLabelEl) {
+                totalLabelEl.innerText = currentExpensePerson ? `${currentExpensePerson} Total` : 'Total Cost';
+            }
 
             const total = expenses.reduce((sum, item) => sum + getExpenseAmount(item), 0);
             totalEl.textContent = formatExpenseAmount(total);
@@ -552,9 +592,9 @@
                 byCategory[category] = (byCategory[category] || 0) + getExpenseAmount(item);
             });
 
-            const rows = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
+            const rows = Object.entries(byCategory).filter(([, amount]) => amount > 0).sort((a, b) => b[1] - a[1]);
             if (!rows.length) {
-                summaryEl.innerHTML = '<p class="text-xs text-gray-400">No expense records yet</p>';
+                summaryEl.innerHTML = `<p class="text-xs text-gray-400">${currentExpensePerson ? `No records for ${currentExpensePerson}` : 'No expense records yet'}</p>`;
                 return;
             }
 
@@ -591,7 +631,10 @@
         }
 
         function getExpenseShareWith(item) {
-            return EXPENSE_PEOPLE.filter(person => String(item[person]).toUpperCase() === 'TRUE');
+            return EXPENSE_PEOPLE.filter(person => {
+                const value = String(item[person]).trim().toUpperCase();
+                return value === '1' || value === 'TRUE';
+            });
         }
 
         function openExpenseActionModal(item) {
@@ -852,7 +895,10 @@
 
             // Expenses
             const expContainer = document.getElementById('expenses-list');
-            const expenseRows = (appData.expenses || []).filter(item => !isExpenseTotalRow(item));
+            let expenseRows = (appData.expenses || []).filter(item => !isExpenseTotalRow(item));
+            if (currentExpensePerson) {
+                expenseRows = expenseRows.filter(item => getExpenseShareWith(item).includes(currentExpensePerson));
+            }
             renderExpenseSummary(expenseRows);
             const sortedExp = [...expenseRows].reverse();
             expContainer.innerHTML = sortedExp.map(item => {
@@ -873,7 +919,7 @@
                             <div class="min-w-0">
                                 <p class="text-[10px] uppercase tracking-[0.14em] text-forest-400 font-bold">${category}</p>
                                 <h4 class="font-semibold text-forest-900 text-sm leading-snug">${description}</h4>
-                                <p class="text-[11px] text-gray-500 mt-1">${paidBy ? `${paidBy} paid` : 'Paid by not set'}${date ? ` • ${date}` : ''}${nights ? ` • ${nights}` : ''}</p>
+                                <p class="text-[11px] text-gray-500 mt-1">${paidBy ? `${paidBy} paid` : 'Paid by not set'}${currentExpensePerson ? ` • ${currentExpensePerson} share: ${formatExpenseAmount(amount)}` : ''}${date ? ` • ${date}` : ''}${nights ? ` • ${nights}` : ''}</p>
                             </div>
                         </div>
                         <div class="text-right shrink-0"><p class="font-bold text-forest-700">${formatExpenseAmount(amount)}</p></div>
