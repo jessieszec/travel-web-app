@@ -120,8 +120,12 @@
             left: 0;
             width: 4px;
             border-radius: 999px;
-            background: linear-gradient(180deg, #395D4A, #D4B98A);
+            background: #395D4A;
         }
+
+        .period-morning:before { background: #AFC7B7; }
+        .period-afternoon:before { background: #5F876C; }
+        .period-evening:before { background: #1A2E28; }
 
         .modal-sheet {
             background:
@@ -205,19 +209,19 @@
         <!-- Bottom Navigation (Fixed to perfectly anchor at bottom) -->
         <nav class="nav-fixed z-20 max-w-md mx-auto px-5 pb-3">
             <div class="bg-white/88 backdrop-blur-xl border border-earth-200 rounded-[1.75rem] px-4 py-2 flex justify-between items-center shadow-nav">
-                <button onclick="switchTab('itinerary', 'Plan')" class="nav-btn flex flex-col items-center justify-center p-2 text-white bg-forest-700 rounded-2xl w-16 min-h-[58px] transition shadow-soft">
+                <button onclick="switchTab('itinerary', 'Plan', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-white bg-forest-700 rounded-2xl w-16 min-h-[58px] transition shadow-soft">
                     <i class="fa-solid fa-route text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Plan</span>
                 </button>
-                <button onclick="switchTab('accommodation', 'Hotels')" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                <button onclick="switchTab('accommodation', 'Hotels', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-bed text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Hotels</span>
                 </button>
-                <button onclick="switchTab('expenses', 'Costs')" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-wallet text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Costs</span>
                 </button>
-                <button onclick="switchTab('packing', 'Pack')" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
+                <button onclick="switchTab('packing', 'Pack', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-suitcase-rolling text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Pack</span>
                 </button>
@@ -377,7 +381,7 @@
             fetchDataFromSheet();
         }
 
-        function switchTab(tabId, title) {
+        function switchTab(tabId, title, clickedBtn) {
             document.getElementById('header-title').innerText = title;
             document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
@@ -387,8 +391,8 @@
                 btn.classList.remove('text-white', 'bg-forest-700', 'shadow-soft');
                 btn.classList.add('text-forest-500');
             });
-            event.currentTarget.classList.remove('text-forest-500');
-            event.currentTarget.classList.add('text-white', 'bg-forest-700', 'shadow-soft');
+            clickedBtn.classList.remove('text-forest-500');
+            clickedBtn.classList.add('text-white', 'bg-forest-700', 'shadow-soft');
         }
 
         function openExpenseModal() { document.getElementById('expense-modal').classList.remove('hidden'); }
@@ -643,8 +647,15 @@
 
             // 還原為太陽、雲太陽、月亮 Icon 邏輯
             let icon = 'fa-sun';
-            if (period === 'Afternoon') icon = 'fa-cloud-sun';
-            if (period === 'Evening') icon = 'fa-moon';
+            let periodClass = 'period-morning';
+            if (period === 'Afternoon') {
+                icon = 'fa-cloud-sun';
+                periodClass = 'period-afternoon';
+            }
+            if (period === 'Evening') {
+                icon = 'fa-moon';
+                periodClass = 'period-evening';
+            }
 
             const iconHtml = `
                 <div class="w-11 h-11 rounded-2xl bg-earth-100 text-champagne flex items-center justify-center text-lg mr-3 shrink-0 shadow-sm">
@@ -669,7 +680,7 @@
 
             // Normal State
             return `
-            <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="luxury-card ticket-edge rounded-[1.5rem] p-4 cursor-pointer hover:shadow-luxury transition active:scale-[0.98] relative overflow-hidden">
+            <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="luxury-card ticket-edge ${periodClass} rounded-[1.5rem] p-4 cursor-pointer hover:shadow-luxury transition active:scale-[0.98] relative overflow-hidden">
                 <div class="flex items-start mb-3 pl-2">
                     ${iconHtml}
                     <div class="flex-1 mt-0.5">
