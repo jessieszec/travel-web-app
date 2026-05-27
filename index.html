@@ -197,6 +197,17 @@
                             <i class="fa-solid fa-plus mr-1"></i> Add
                         </button>
                     </div>
+                    <div class="mt-4">
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold mb-2">View By Person</p>
+                        <div id="expense-person-filter" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
+                            <button id="person-filter-all" onclick="setExpensePersonFilter(null)" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-forest-700 text-white shadow-sm">All</button>
+                            <button id="person-filter-PWS" onclick="setExpensePersonFilter('PWS')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-earth-50 border border-earth-200 text-forest-700 shadow-sm">PWS</button>
+                            <button id="person-filter-KCW" onclick="setExpensePersonFilter('KCW')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-earth-50 border border-earth-200 text-forest-700 shadow-sm">KCW</button>
+                            <button id="person-filter-FST" onclick="setExpensePersonFilter('FST')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-earth-50 border border-earth-200 text-forest-700 shadow-sm">FST</button>
+                            <button id="person-filter-KCH" onclick="setExpensePersonFilter('KCH')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-earth-50 border border-earth-200 text-forest-700 shadow-sm">KCH</button>
+                            <button id="person-filter-CHM" onclick="setExpensePersonFilter('CHM')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-earth-50 border border-earth-200 text-forest-700 shadow-sm">CHM</button>
+                        </div>
+                    </div>
                     <div class="mt-4 flex items-center justify-between gap-3">
                         <div>
                             <p id="expenses-total-label" class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Total Cost</p>
@@ -205,17 +216,6 @@
                         <div class="bg-white/80 border border-earth-200 rounded-full p-1 flex text-xs font-semibold shadow-sm">
                             <button id="currency-cad-btn" onclick="setExpenseCurrency('CAD')" class="currency-btn px-3 py-1.5 rounded-full bg-forest-700 text-white">CAD</button>
                             <button id="currency-hkd-btn" onclick="setExpenseCurrency('HKD')" class="currency-btn px-3 py-1.5 rounded-full text-forest-600">HKD</button>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold mb-2">View By Person</p>
-                        <div id="expense-person-filter" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
-                            <button id="person-filter-all" onclick="setExpensePersonFilter(null)" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-forest-700 text-white shadow-sm">All</button>
-                            <button id="person-filter-PWS" onclick="setExpensePersonFilter('PWS')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">PWS</button>
-                            <button id="person-filter-KCW" onclick="setExpensePersonFilter('KCW')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">KCW</button>
-                            <button id="person-filter-FST" onclick="setExpensePersonFilter('FST')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">FST</button>
-                            <button id="person-filter-KCH" onclick="setExpensePersonFilter('KCH')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">KCH</button>
-                            <button id="person-filter-CHM" onclick="setExpensePersonFilter('CHM')" class="person-filter-btn flex-shrink-0 px-3 py-2 rounded-full text-xs font-semibold bg-white border border-earth-200 text-forest-600 shadow-sm">CHM</button>
                         </div>
                     </div>
                     <div id="expenses-category-summary" class="mt-4 space-y-2"></div>
@@ -237,15 +237,15 @@
                     <i class="fa-solid fa-route text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Plan</span>
                 </button>
-                <button onclick="switchTab('accommodation', 'Hotels', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 rounded-2xl w-16 min-h-[58px] transition">
+                <button onclick="switchTab('accommodation', 'Hotels', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-bed text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Hotels</span>
                 </button>
-                <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 rounded-2xl w-16 min-h-[58px] transition">
+                <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-wallet text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Costs</span>
                 </button>
-                <button onclick="switchTab('packing', 'Pack', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-forest-700 rounded-2xl w-16 min-h-[58px] transition">
+                <button onclick="switchTab('packing', 'Pack', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-suitcase-rolling text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Pack</span>
                 </button>
@@ -324,13 +324,13 @@
                         <input type="text" id="exp-name" required placeholder="e.g. Medina Breakfast" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                     </div>
                     <div id="exp-date-nights-row" class="space-y-4">
-                        <div>
+                        <div id="exp-date-wrapper" class="min-w-0">
                             <label class="block text-sm font-semibold text-forest-700 mb-1">Date</label>
-                            <input type="date" id="exp-date" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                            <input type="date" id="exp-date" required class="block w-full min-w-0 box-border bg-white border border-earth-200 rounded-2xl px-3 py-3 text-sm outline-none focus:border-forest-500 shadow-sm">
                         </div>
-                        <div id="exp-nights-wrapper" class="hidden">
+                        <div id="exp-nights-wrapper" class="hidden min-w-0">
                             <label class="block text-sm font-semibold text-forest-700 mb-1">Nights</label>
-                            <input type="number" min="1" step="1" id="exp-nights" placeholder="1" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                            <input type="number" min="1" step="1" id="exp-nights" placeholder="1" class="block w-full min-w-0 box-border bg-white border border-earth-200 rounded-2xl px-3 py-3 text-sm outline-none focus:border-forest-500 shadow-sm">
                         </div>
                     </div>
                     <div>
@@ -501,7 +501,7 @@
             if (!shouldShow) nightsInput.value = '';
             const dateNightsRow = document.getElementById('exp-date-nights-row');
             if (dateNightsRow) {
-                dateNightsRow.className = shouldShow ? 'grid grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] gap-3' : 'space-y-4';
+                dateNightsRow.className = shouldShow ? 'grid grid-cols-[minmax(0,1fr)_96px] gap-3 items-end' : 'space-y-4';
             }
         }
 
@@ -526,13 +526,13 @@
 
             document.querySelectorAll('.person-filter-btn').forEach(btn => {
                 btn.classList.remove('bg-forest-700', 'text-white');
-                btn.classList.add('bg-white', 'border', 'border-earth-200', 'text-forest-600');
+                btn.classList.add('bg-earth-50', 'border', 'border-earth-200', 'text-forest-700');
             });
 
             const activeId = person ? `person-filter-${person}` : 'person-filter-all';
             const activeBtn = document.getElementById(activeId);
             if (activeBtn) {
-                activeBtn.classList.remove('bg-white', 'border', 'border-earth-200', 'text-forest-600');
+                activeBtn.classList.remove('bg-earth-50', 'border', 'border-earth-200', 'text-forest-700');
                 activeBtn.classList.add('bg-forest-700', 'text-white');
             }
 
@@ -912,7 +912,7 @@
                 const safeItemJson = JSON.stringify(item).replace(/'/g, "&#39;");
 
                 return `
-                <div oncontextmenu='event.preventDefault(); openExpenseActionModal(${safeItemJson})' ontouchstart='startExpenseLongPress(${safeItemJson})' ontouchend='cancelExpenseLongPress()' ontouchmove='cancelExpenseLongPress()' class="luxury-card rounded-[1.35rem] p-4 cursor-pointer active:scale-[0.98] transition">
+                <div onclick='openExpenseEditModal(${safeItemJson})' class="luxury-card rounded-[1.35rem] p-4 cursor-pointer active:scale-[0.98] transition">
                     <div class="flex justify-between items-start gap-3">
                         <div class="flex items-start min-w-0">
                             <div class="bg-earth-100 text-forest-700 w-11 h-11 rounded-2xl flex justify-center items-center mr-3 text-lg shadow-sm shrink-0">${getCategoryIcon(category)}</div>
