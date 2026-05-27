@@ -552,22 +552,14 @@
             const note = item['Note'] || '';
             const joining = item["Who's Joining"] || '';
             
-            // 使用帶數字的地圖標記
             let iconText = '1';
-            let iconColor = 'bg-forest-100 text-forest-600';
-            if (period === 'Afternoon') {
-                iconText = '2';
-                iconColor = 'bg-earth-200 text-earth-800';
-            }
-            if (period === 'Evening') {
-                iconText = '3';
-                iconColor = 'bg-gray-200 text-gray-800';
-            }
+            if (period === 'Afternoon') iconText = '2';
+            if (period === 'Evening') iconText = '3';
             
             const iconHtml = `
-                <div class="w-8 h-8 rounded-full ${iconColor} flex items-center justify-center font-bold text-sm mr-3 shrink-0 relative">
-                    <i class="fa-solid fa-location-dot absolute opacity-20 text-xl"></i>
-                    <span class="z-10">${iconText}</span>
+                <div class="w-10 h-10 flex items-center justify-center text-forest-700 mr-3 shrink-0 relative">
+                    <i class="fa-solid fa-location-dot absolute text-4xl"></i>
+                    <span class="z-10 text-white font-bold text-sm -mt-2">${iconText}</span>
                 </div>
             `;
             
@@ -576,7 +568,7 @@
                 return `
                 <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="bg-earth-50 border border-dashed border-gray-300 rounded-2xl p-4 flex items-center justify-center cursor-pointer hover:bg-earth-100 transition active:scale-95">
                     <div class="flex items-center text-gray-400">
-                        ${iconHtml}
+                        ${iconHtml.replace('text-forest-700', 'text-gray-300').replace('text-white', 'text-gray-500')}
                         <div>
                             <p class="font-medium text-sm text-left">${period}</p>
                             <p class="text-xs">No plan yet. Click to add.</p>
@@ -594,20 +586,20 @@
                 <!-- Period & Destination -->
                 <div class="flex items-start mb-3">
                     ${iconHtml}
-                    <div class="flex-1">
+                    <div class="flex-1 mt-1">
                         <span class="text-[10px] font-bold uppercase tracking-wider text-forest-500 bg-forest-50 px-2 py-0.5 rounded inline-block mb-1">${period}</span>
                         <h3 class="text-lg font-bold text-forest-900 leading-tight">${dest || 'TBD'}</h3>
                     </div>
                 </div>
                 
                 <!-- Activities -->
-                ${act ? `<div class="mb-3 text-sm text-gray-700 whitespace-pre-line pl-11">${act}</div>` : ''}
+                ${act ? `<div class="mb-3 text-sm text-gray-700 whitespace-pre-line pl-12 ml-1">${act}</div>` : ''}
                 
                 <!-- Note -->
-                ${note ? `<div class="mb-3 text-xs text-gray-500 italic pl-11"><i class="fa-regular fa-comment-dots mr-1"></i>${note}</div>` : ''}
+                ${note ? `<div class="mb-3 text-xs text-gray-500 italic pl-12 ml-1"><i class="fa-regular fa-comment-dots mr-1"></i>${note}</div>` : ''}
                 
                 <!-- Buttons -->
-                <div class="pl-11 flex flex-wrap gap-2 mb-3">
+                <div class="pl-12 ml-1 flex flex-wrap gap-2 mb-3">
                     ${addr ? `
                         <button onclick="copyToClipboard('${addr.replace(/'/g, "\\'")}', event)" class="text-xs bg-earth-50 border border-earth-100 text-forest-700 py-1.5 px-3 rounded-lg font-medium hover:bg-earth-100 transition"><i class="fa-regular fa-copy mr-1"></i> Address</button>
                         <a onclick="preventProp(event)" href="https://maps.google.com/?q=${encodeURIComponent(addr)}" target="_blank" class="text-xs bg-forest-50 border border-forest-100 text-forest-700 py-1.5 px-3 rounded-lg font-medium hover:bg-forest-100 transition"><i class="fa-solid fa-map mr-1"></i> Map</a>
@@ -619,7 +611,7 @@
                 
                 <!-- Who's joining -->
                 ${joining ? `
-                <div class="pl-11 pt-2 border-t border-earth-100 mt-2">
+                <div class="pl-12 ml-1 pt-2 border-t border-earth-100 mt-2">
                     <p class="text-[10px] text-gray-400 mb-1 uppercase">Who's joining</p>
                     <div class="flex flex-wrap">${getParticipantTags(joining)}</div>
                 </div>
