@@ -35,8 +35,8 @@
             overflow-y: auto; 
             /* iOS 專屬：令 Scroll 變得極度順滑 (Momentum Scrolling) */
             -webkit-overflow-scrolling: touch; 
-            /* 預留空間給底部導航列及 iPhone 底部 Home Indicator */
-            padding-bottom: calc(85px + env(safe-area-inset-bottom)); 
+            /* 預留空間給底部導航列及 iPhone 底部 Home Indicator (已大幅增加緩衝區解決遮擋問題) */
+            padding-bottom: calc(160px + env(safe-area-inset-bottom)); 
         }
         
         /* 鎖死底部導航列，並避開 iPhone 底部黑條 */
@@ -607,7 +607,7 @@
                         <a onclick="preventProp(event)" href="https://maps.google.com/?q=${encodeURIComponent(addr)}" target="_blank" class="text-xs bg-forest-50 border border-forest-100 text-forest-700 py-1.5 px-3 rounded-lg font-medium hover:bg-forest-100 transition"><i class="fa-solid fa-map mr-1"></i> Map</a>
                     ` : ''}
                     ${link ? `
-                        <a onclick="preventProp(event)" href="${link}" target="_blank" class="text-xs bg-forest-500 text-white py-1.5 px-3 rounded-lg font-medium hover:bg-forest-600 transition shadow-sm"><i class="fa-solid fa-link mr-1"></i> View</a>
+                        <a onclick="preventProp(event)" href="${link}" target="_blank" class="text-xs bg-forest-500 text-white py-1.5 px-3 rounded-lg font-medium hover:bg-forest-600 transition shadow-sm"><i class="fa-solid fa-link mr-1"></i> View Booking</a>
                     ` : ''}
                 </div>
                 
