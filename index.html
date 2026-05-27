@@ -316,11 +316,16 @@
             e.stopPropagation();
         }
 
+        // 解析 DD/MM/YYYY 或其他格式為 timestamp 用於排序
         function parseDateForSort(dateStr) {
             if (!dateStr) return 0;
-            if (dateStr.includes('/')) {
+            // 處理 DD/MM/YYYY
+            if (typeof dateStr === 'string' && dateStr.includes('/')) {
                 const parts = dateStr.split('/');
-                if (parts.length === 3) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+                if (parts.length === 3) {
+                    // 為了避免時區問題，使用 UTC 時間建立 Date
+                    return Date.UTC(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                }
             }
             return new Date(dateStr).getTime() || 0;
         }
@@ -328,11 +333,13 @@
         // 格式化日期用作顯示標籤 (例如: 19 Aug)
         function formatShortDate(dateStr) {
              if (!dateStr) return '';
-             if (dateStr.includes('/')) {
+             if (typeof dateStr === 'string' && dateStr.includes('/')) {
                 const parts = dateStr.split('/');
                 if (parts.length === 3) {
-                    const d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-                    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const day = parseInt(parts[0], 10); // 確保無前導零時也能正確顯示
+                    const month = months[parseInt(parts[1], 10) - 1];
+                    return `${day} ${month}`;
                 }
             }
             return dateStr;
@@ -355,7 +362,7 @@
                 const response = await fetch(GAS_WEBAPP_URL);
                 const data = await response.json();
                 appData = data;
-                console.log("Data fetched from Google Sheet:", appData); // DEBUG: 睇下後台攞到啲咩
+                console.log("Data fetched from Google Sheet:", appData); // DEBUG
                 localStorage.setItem('travelAppData', JSON.stringify(appData));
                 renderAllData();
                 document.getElementById('sync-status').innerHTML = '<i class="fa-solid fa-check-circle mr-1 text-green-400"></i>Up to date';
@@ -545,18 +552,35 @@
             const note = item['Note'] || '';
             const joining = item["Who's Joining"] || '';
             
-            let icon = 'fa-sun';
-            if (period === 'Afternoon') icon = 'fa-cloud-sun';
-            if (period === 'Evening') icon = 'fa-moon';
+            // 使用帶數字的地圖標記
+            let iconText = '1';
+            let iconColor = 'bg-forest-100 text-forest-600';
+            if (period === 'Afternoon') {
+                iconText = '2';
+                iconColor = 'bg-earth-200 text-earth-800';
+            }
+            if (period === 'Evening') {
+                iconText = '3';
+                iconColor = 'bg-gray-200 text-gray-800';
+            }
+            
+            const iconHtml = `
+                <div class="w-8 h-8 rounded-full ${iconColor} flex items-center justify-center font-bold text-sm mr-3 shrink-0 relative">
+                    <i class="fa-solid fa-location-dot absolute opacity-20 text-xl"></i>
+                    <span class="z-10">${iconText}</span>
+                </div>
+            `;
             
             // Handle Empty State
             if (item.isEmpty || (!dest && !act)) {
                 return `
                 <div onclick='openEditItineraryModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="bg-earth-50 border border-dashed border-gray-300 rounded-2xl p-4 flex items-center justify-center cursor-pointer hover:bg-earth-100 transition active:scale-95">
-                    <div class="text-center text-gray-400">
-                        <i class="fa-solid ${icon} text-2xl mb-2 opacity-50"></i>
-                        <p class="font-medium text-sm">${period}</p>
-                        <p class="text-xs mt-1">No plan yet. Click to add.</p>
+                    <div class="flex items-center text-gray-400">
+                        ${iconHtml}
+                        <div>
+                            <p class="font-medium text-sm text-left">${period}</p>
+                            <p class="text-xs">No plan yet. Click to add.</p>
+                        </div>
                     </div>
                 </div>
                 `;
@@ -569,9 +593,7 @@
                 
                 <!-- Period & Destination -->
                 <div class="flex items-start mb-3">
-                    <div class="w-8 h-8 rounded-full bg-forest-50 text-forest-500 flex items-center justify-center text-sm mr-3 shrink-0">
-                        <i class="fa-solid ${icon}"></i>
-                    </div>
+                    ${iconHtml}
                     <div class="flex-1">
                         <span class="text-[10px] font-bold uppercase tracking-wider text-forest-500 bg-forest-50 px-2 py-0.5 rounded inline-block mb-1">${period}</span>
                         <h3 class="text-lg font-bold text-forest-900 leading-tight">${dest || 'TBD'}</h3>
