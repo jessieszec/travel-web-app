@@ -187,14 +187,27 @@
 
             <!-- Expenses Tab -->
             <div id="view-expenses" class="tab-view hidden space-y-4">
-                <div class="soft-panel rounded-[1.5rem] p-4 shadow-soft flex justify-between items-center mb-2">
-                    <div>
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Travel Budget</p>
-                        <h2 class="font-display text-2xl font-semibold text-forest-700">Expenses</h2>
+                <div class="soft-panel rounded-[1.5rem] p-4 shadow-soft mb-2">
+                    <div class="flex justify-between items-start gap-3">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Travel Budget</p>
+                            <h2 class="font-display text-2xl font-semibold text-forest-700">Expenses</h2>
+                        </div>
+                        <button onclick="openExpenseModal()" class="luxury-bg text-white px-4 py-2.5 rounded-full text-sm font-semibold shadow-soft hover:opacity-95 transition active:scale-95">
+                            <i class="fa-solid fa-plus mr-1"></i> Add
+                        </button>
                     </div>
-                    <button onclick="openExpenseModal()" class="luxury-bg text-white px-4 py-2.5 rounded-full text-sm font-semibold shadow-soft hover:opacity-95 transition active:scale-95">
-                        <i class="fa-solid fa-plus mr-1"></i> Add
-                    </button>
+                    <div class="mt-4 flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Total Cost</p>
+                            <p id="expenses-total" class="font-display text-3xl font-semibold text-forest-900 mt-0.5">$0</p>
+                        </div>
+                        <div class="bg-white/80 border border-earth-200 rounded-full p-1 flex text-xs font-semibold shadow-sm">
+                            <button id="currency-cad-btn" onclick="setExpenseCurrency('CAD')" class="currency-btn px-3 py-1.5 rounded-full bg-forest-700 text-white">CAD</button>
+                            <button id="currency-hkd-btn" onclick="setExpenseCurrency('HKD')" class="currency-btn px-3 py-1.5 rounded-full text-forest-600">HKD</button>
+                        </div>
+                    </div>
+                    <div id="expenses-category-summary" class="mt-4 space-y-2"></div>
                 </div>
                 <div id="expenses-list" class="space-y-3"></div>
             </div>
@@ -286,38 +299,53 @@
                 <form id="expense-form" class="space-y-4" onsubmit="submitExpense(event)">
                     <div>
                         <label class="block text-sm font-semibold text-forest-700 mb-1">Category</label>
-                        <select id="exp-category" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 focus:ring-1 focus:ring-forest-500 shadow-sm">
+                        <select id="exp-category" required onchange="toggleNightsField()" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 focus:ring-1 focus:ring-forest-500 shadow-sm">
                             <option value="" disabled selected>Select category</option>
                             <option value="Hotel">🏨 Hotel</option>
-                            <option value="Transport">🚗 Transport</option>
-                            <option value="Food">🍽️ Food</option>
-                            <option value="Groceries">🛒 Groceries</option>
-                            <option value="Tickets">🎟️ Tickets</option>
+                            <option value="Car Rental">🚗 Car Rental</option>
+                            <option value="Meal">🍽️ Meal</option>
+                            <option value="Grocery">🛒 Grocery</option>
+                            <option value="Admission Tickets">🎟️ Admission Tickets</option>
                             <option value="Others">📌 Others</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-forest-700 mb-1">Item Name</label>
-                        <input type="text" id="exp-name" required placeholder="e.g. Dinner @ Keg" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-forest-700 mb-1">Amount</label>
-                        <input type="number" step="0.01" id="exp-amount" required placeholder="0.00" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Item / Description</label>
+                        <input type="text" id="exp-name" required placeholder="e.g. Medina Breakfast" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-forest-700 mb-1">Pay By</label>
-                            <select id="exp-payby" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
-                                <option value="Me">Me</option>
-                                <option value="Friend A">Friend A</option>
-                            </select>
+                            <label class="block text-sm font-semibold text-forest-700 mb-1">Date</label>
+                            <input type="date" id="exp-date" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-forest-700 mb-1">Share With</label>
-                            <select id="exp-participants" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
-                                <option value="All">All</option>
-                                <option value="Individual">Individual</option>
-                            </select>
+                        <div id="exp-nights-wrapper" class="hidden">
+                            <label class="block text-sm font-semibold text-forest-700 mb-1">Nights</label>
+                            <input type="number" min="1" step="1" id="exp-nights" placeholder="1" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Total Cost (CAD)</label>
+                        <input type="number" step="0.01" id="exp-amount" required placeholder="0.00" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Paid By</label>
+                        <select id="exp-payby" required class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                            <option value="" disabled selected>Select person</option>
+                            <option value="PWS">PWS</option>
+                            <option value="KCW">KCW</option>
+                            <option value="FST">FST</option>
+                            <option value="KCH">KCH</option>
+                            <option value="CHM">CHM</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-forest-700 mb-2">Share With</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="cursor-pointer"><input type="checkbox" name="exp-sharewith" value="PWS" class="peer hidden"><span class="block text-center px-3 py-2 rounded-full border border-earth-200 bg-white text-forest-600 text-xs font-semibold peer-checked:bg-forest-700 peer-checked:text-white peer-checked:border-forest-700 transition">PWS</span></label>
+                            <label class="cursor-pointer"><input type="checkbox" name="exp-sharewith" value="KCW" class="peer hidden"><span class="block text-center px-3 py-2 rounded-full border border-earth-200 bg-white text-forest-600 text-xs font-semibold peer-checked:bg-forest-700 peer-checked:text-white peer-checked:border-forest-700 transition">KCW</span></label>
+                            <label class="cursor-pointer"><input type="checkbox" name="exp-sharewith" value="FST" class="peer hidden"><span class="block text-center px-3 py-2 rounded-full border border-earth-200 bg-white text-forest-600 text-xs font-semibold peer-checked:bg-forest-700 peer-checked:text-white peer-checked:border-forest-700 transition">FST</span></label>
+                            <label class="cursor-pointer"><input type="checkbox" name="exp-sharewith" value="KCH" class="peer hidden"><span class="block text-center px-3 py-2 rounded-full border border-earth-200 bg-white text-forest-600 text-xs font-semibold peer-checked:bg-forest-700 peer-checked:text-white peer-checked:border-forest-700 transition">KCH</span></label>
+                            <label class="cursor-pointer"><input type="checkbox" name="exp-sharewith" value="CHM" class="peer hidden"><span class="block text-center px-3 py-2 rounded-full border border-earth-200 bg-white text-forest-600 text-xs font-semibold peer-checked:bg-forest-700 peer-checked:text-white peer-checked:border-forest-700 transition">CHM</span></label>
                         </div>
                     </div>
                     <button type="submit" id="exp-submit-btn" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 mt-4 shadow-lg hover:opacity-95 transition active:scale-95 flex justify-center items-center mb-8">
@@ -375,6 +403,9 @@
         let appData = { itinerary: [], accommodation: [], expenses: [], packing: [] };
         let uniqueDays = [];
         let currentSelectedDate = '';
+        let currentExpenseCurrency = 'CAD';
+        const EXPENSE_PEOPLE = ['PWS', 'KCW', 'FST', 'KCH', 'CHM'];
+        const CAD_TO_HKD_RATE = 5.7;
 
         function initializeApp() {
             loadCachedData();
@@ -395,8 +426,108 @@
             clickedBtn.classList.add('text-white', 'bg-forest-700', 'shadow-soft', 'rounded-2xl');
         }
 
-        function openExpenseModal() { document.getElementById('expense-modal').classList.remove('hidden'); }
+        function openExpenseModal() {
+            document.getElementById('expense-modal').classList.remove('hidden');
+            const dateInput = document.getElementById('exp-date');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+            toggleNightsField();
+        }
         function closeExpenseModal() { document.getElementById('expense-modal').classList.add('hidden'); }
+
+        function toggleNightsField() {
+            const category = document.getElementById('exp-category')?.value;
+            const wrapper = document.getElementById('exp-nights-wrapper');
+            const nightsInput = document.getElementById('exp-nights');
+            if (!wrapper || !nightsInput) return;
+
+            const shouldShow = category === 'Hotel' || category === 'Car Rental';
+            wrapper.classList.toggle('hidden', !shouldShow);
+            nightsInput.required = shouldShow;
+            if (!shouldShow) nightsInput.value = '';
+        }
+
+        function setExpenseCurrency(currency) {
+            currentExpenseCurrency = currency;
+            document.querySelectorAll('.currency-btn').forEach(btn => {
+                btn.classList.remove('bg-forest-700', 'text-white');
+                btn.classList.add('text-forest-600');
+            });
+
+            const activeBtn = document.getElementById(`currency-${currency.toLowerCase()}-btn`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-forest-600');
+                activeBtn.classList.add('bg-forest-700', 'text-white');
+            }
+
+            renderAllData();
+        }
+
+        function parseMoney(value) {
+            if (value === null || value === undefined || value === '') return 0;
+            if (typeof value === 'number') return value;
+            const cleaned = String(value).replace(/[^0-9.-]/g, '');
+            return Number(cleaned) || 0;
+        }
+
+        function isExpenseTotalRow(item) {
+            const category = String(item['Category'] || '').trim();
+            const description = String(item['Item / Description'] || item['Item'] || '').trim();
+            return !category && !description;
+        }
+
+        function getExpenseAmount(item) {
+            if (currentExpenseCurrency === 'HKD') {
+                const hkd = parseMoney(item['Total Cost (HKD)']);
+                if (hkd) return hkd;
+                return parseMoney(item['Total Cost (CAD)'] || item['Amount']) * CAD_TO_HKD_RATE;
+            }
+            return parseMoney(item['Total Cost (CAD)'] || item['Amount']);
+        }
+
+        function formatExpenseAmount(amount) {
+            if (currentExpenseCurrency === 'HKD') {
+                return `HK$${Math.round(amount).toLocaleString()}`;
+            }
+            return `$${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+        }
+
+        function renderExpenseSummary(expenses) {
+            const totalEl = document.getElementById('expenses-total');
+            const summaryEl = document.getElementById('expenses-category-summary');
+            if (!totalEl || !summaryEl) return;
+
+            const total = expenses.reduce((sum, item) => sum + getExpenseAmount(item), 0);
+            totalEl.textContent = formatExpenseAmount(total);
+
+            const byCategory = {};
+            expenses.forEach(item => {
+                const category = item['Category'] || 'Others';
+                byCategory[category] = (byCategory[category] || 0) + getExpenseAmount(item);
+            });
+
+            const rows = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
+            if (!rows.length) {
+                summaryEl.innerHTML = '<p class="text-xs text-gray-400">No expense records yet</p>';
+                return;
+            }
+
+            summaryEl.innerHTML = rows.map(([category, amount]) => {
+                const pct = total ? Math.max(4, Math.round((amount / total) * 100)) : 0;
+                return `
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-semibold text-forest-700">${category}</span>
+                            <span class="text-forest-500">${formatExpenseAmount(amount)}</span>
+                        </div>
+                        <div class="h-2 bg-earth-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-forest-500 rounded-full" style="width:${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -561,16 +692,34 @@
 
             // Expenses
             const expContainer = document.getElementById('expenses-list');
-            const sortedExp = [...appData.expenses].reverse();
-            expContainer.innerHTML = sortedExp.map(item => `
-                <div class="luxury-card rounded-[1.35rem] p-4 flex justify-between items-center">
-                    <div class="flex items-center">
-                        <div class="bg-earth-100 text-forest-700 w-11 h-11 rounded-2xl flex justify-center items-center mr-3 text-lg shadow-sm">${getCategoryIcon(item['Category'] || item['Category'])}</div>
-                        <div><h4 class="font-semibold text-forest-900 text-sm">${item['Item / Description'] || item['Item'] || 'Expense'}</h4><p class="text-[11px] text-gray-500">${item['Paid By'] || ''} paid</p></div>
+            const expenseRows = (appData.expenses || []).filter(item => !isExpenseTotalRow(item));
+            renderExpenseSummary(expenseRows);
+            const sortedExp = [...expenseRows].reverse();
+            expContainer.innerHTML = sortedExp.map(item => {
+                const category = item['Category'] || 'Others';
+                const description = item['Item / Description'] || item['Item'] || 'Expense';
+                const paidBy = item['Paid By'] || '';
+                const date = item['Date'] || '';
+                const nights = item['Nights'] ? `${item['Nights']} night${Number(item['Nights']) > 1 ? 's' : ''}` : '';
+                const amount = getExpenseAmount(item);
+                const sharedWith = EXPENSE_PEOPLE.filter(person => String(item[person]).toUpperCase() === 'TRUE');
+
+                return `
+                <div class="luxury-card rounded-[1.35rem] p-4">
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="flex items-start min-w-0">
+                            <div class="bg-earth-100 text-forest-700 w-11 h-11 rounded-2xl flex justify-center items-center mr-3 text-lg shadow-sm shrink-0">${getCategoryIcon(category)}</div>
+                            <div class="min-w-0">
+                                <p class="text-[10px] uppercase tracking-[0.14em] text-forest-400 font-bold">${category}</p>
+                                <h4 class="font-semibold text-forest-900 text-sm leading-snug">${description}</h4>
+                                <p class="text-[11px] text-gray-500 mt-1">${paidBy ? `${paidBy} paid` : 'Paid by not set'}${date ? ` • ${date}` : ''}${nights ? ` • ${nights}` : ''}</p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0"><p class="font-bold text-forest-700">${formatExpenseAmount(amount)}</p></div>
                     </div>
-                    <div class="text-right"><p class="font-bold text-forest-700">$${item['Total Cost (CAD)'] || item['Amount'] || 0}</p></div>
-                </div>
-            `).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
+                    ${sharedWith.length ? `<div class="mt-3 pt-3 border-t border-earth-100"><p class="text-[10px] text-gray-400 mb-1 uppercase tracking-[0.12em]">Share with</p><div class="flex flex-wrap">${getParticipantTags(sharedWith.join(','))}</div></div>` : ''}
+                </div>`;
+            }).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
 
             // Packing
             const packContainer = document.getElementById('view-packing');
@@ -788,10 +937,10 @@
         function getCategoryIcon(cat) {
             if(!cat) return '<i class="fa-solid fa-receipt"></i>';
             if(cat.includes('Hotel')) return '🏨';
-            if(cat.includes('Transport')) return '🚗';
-            if(cat.includes('Food') || cat.includes('Meal') || cat.includes('Dining')) return '🍽️';
-            if(cat.includes('Groceries')) return '🛒';
-            if(cat.includes('Ticket')) return '🎟️';
+            if(cat.includes('Car Rental')) return '🚗';
+            if(cat.includes('Meal')) return '🍽️';
+            if(cat.includes('Grocery')) return '🛒';
+            if(cat.includes('Admission') || cat.includes('Ticket')) return '🎟️';
             return '📌';
         }
 
@@ -800,25 +949,50 @@
             const btn = document.getElementById('exp-submit-btn');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; btn.disabled = true;
 
+            const shareWith = Array.from(document.querySelectorAll('input[name="exp-sharewith"]:checked')).map(input => input.value);
+
             const payload = {
                 action: 'addExpense',
                 category: document.getElementById('exp-category').value,
                 itemName: document.getElementById('exp-name').value,
+                date: document.getElementById('exp-date').value,
+                nights: document.getElementById('exp-nights').value,
                 amount: document.getElementById('exp-amount').value,
                 payBy: document.getElementById('exp-payby').value,
-                participants: document.getElementById('exp-participants').value
+                shareWith: shareWith
             };
 
             try {
                 if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
-                await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const json = await res.json();
 
-                appData.expenses.push({ 'Category': payload.category, 'Item / Description': payload.itemName, 'Total Cost (CAD)': payload.amount, 'Paid By': payload.payBy });
+                if(json.status !== 'success') {
+                    throw new Error(json.message || 'Failed to save expense');
+                }
+
+                appData.expenses.push({
+                    'Category': payload.category,
+                    'Item / Description': payload.itemName,
+                    'Date': payload.date,
+                    'Nights': payload.nights,
+                    'Total Cost (CAD)': payload.amount,
+                    'Total Cost (HKD)': Number(payload.amount || 0) * CAD_TO_HKD_RATE,
+                    'Paid By': payload.payBy,
+                    'PWS': shareWith.includes('PWS') ? 'TRUE' : '',
+                    'KCW': shareWith.includes('KCW') ? 'TRUE' : '',
+                    'FST': shareWith.includes('FST') ? 'TRUE' : '',
+                    'KCH': shareWith.includes('KCH') ? 'TRUE' : '',
+                    'CHM': shareWith.includes('CHM') ? 'TRUE' : ''
+                });
                 renderAllData(); 
 
-                document.getElementById('expense-form').reset(); closeExpenseModal(); fetchDataFromSheet();
+                document.getElementById('expense-form').reset();
+                document.querySelectorAll('input[name="exp-sharewith"]').forEach(input => input.checked = false);
+                closeExpenseModal();
+                fetchDataFromSheet(true);
             } catch (error) {
-                alert('Failed to upload.');
+                alert('Failed to upload: ' + error.message);
             } finally {
                 btn.innerHTML = '<span>Save Record</span>'; btn.disabled = false;
             }
