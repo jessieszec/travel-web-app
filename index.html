@@ -480,16 +480,29 @@
 
         function getParticipantTags(str) {
             if (!str) return '';
-            const names = str.split(',').map(n => n.trim()).filter(n => n);
-            return names.map(name => {
-                let bg = 'bg-earth-100', text = 'text-forest-600';
-                if (name === 'PWS') { bg = 'bg-yellow-100'; text = 'text-yellow-800'; }
-                else if (name === 'KCW') { bg = 'bg-blue-100'; text = 'text-blue-800'; }
-                else if (name === 'CHM') { bg = 'bg-pink-100'; text = 'text-pink-800'; }
-                else if (name === 'FST') { bg = 'bg-gray-200'; text = 'text-gray-800'; }
-                else if (name === 'KCH') { bg = 'bg-[#E6D5C3]'; text = 'text-[#5C4033]'; } 
 
-                return `<span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mr-1 mb-1 ${bg} ${text}">${name}</span>`;
+            const names = str.split(',').map(n => n.trim()).filter(n => n);
+
+            return names.map(name => {
+                let style = 'bg-earth-100 text-forest-700 border border-earth-200';
+
+                if (name === 'PWS') {
+                    style = 'bg-[#EFE3CF] text-forest-700 border border-[#D8C2A0]';
+                }
+                else if (name === 'KCW') {
+                    style = 'bg-[#DCE7DF] text-forest-700 border border-[#B7C9BB]';
+                }
+                else if (name === 'CHM') {
+                    style = 'bg-[#E9DDD8] text-forest-700 border border-[#D2BDB5]';
+                }
+                else if (name === 'FST') {
+                    style = 'bg-[#E7E3DD] text-forest-700 border border-[#D1CBC2]';
+                }
+                else if (name === 'KCH') {
+                    style = 'bg-[#DDD1C3] text-forest-700 border border-[#C2AE98]';
+                }
+
+                return `<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.08em] uppercase mr-1.5 mb-1.5 shadow-sm ${style}">${name}</span>`;
             }).join('');
         }
 
