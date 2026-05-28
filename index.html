@@ -82,6 +82,18 @@
             bottom: 0;
             left: 0;
             right: 0;
+            background: rgba(248, 244, 236, 0.96);
+            border-top: 1px solid rgba(226, 212, 189, 0.85);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .nav-dock-inner {
+            height: 82px;
+            padding: 0.5rem 1rem 0.55rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
         }
 
         /* 頂部 Header 避開 iPhone 動態島/瀏海 */
@@ -249,13 +261,13 @@
             <!-- Packing List Tab -->
             <!-- <div id="view-packing" class="tab-view hidden space-y-4"></div> -->
 
-            <!-- 實體透明隱形方塊 (Spacer)：徹底解決 iOS Safari 忽略 padding 導致底部被遮擋的問題 -->
-            <div class="h-20 w-full shrink-0 pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);"></div>
+        <!-- 實體透明隱形方塊 (Spacer)：徹底解決 iOS Safari 忽略 padding 導致底部被遮擋的問題 -->
+        <div class="h-28 w-full shrink-0 pointer-events-none"></div>
         </main>
 
         <!-- Bottom Navigation (Fixed to perfectly anchor at bottom) -->
-        <nav class="nav-fixed z-20 max-w-md mx-auto w-full bg-earth-50/95 backdrop-blur-xl border-t border-earth-200">
-            <div class="px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] flex justify-around items-center">
+        <nav class="nav-fixed z-20 max-w-md mx-auto w-full">
+            <div class="nav-dock-inner">
                 <button onclick="switchTab('home', 'Home', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-white bg-forest-700 rounded-2xl w-14 min-h-[58px] transition shadow-soft">
                     <i class="fa-solid fa-house text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Home</span>
