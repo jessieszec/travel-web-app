@@ -136,27 +136,8 @@
 </head>
 <body class="text-forest-900 antialiased selection:bg-forest-500 selection:text-white">
 
-    <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 bg-earth-50 z-[100] flex flex-col justify-center items-center p-6 transition-opacity duration-300">
-        <div class="bg-white/95 p-8 rounded-[2rem] shadow-luxury w-full max-w-sm text-center border border-earth-200">
-            <div class="w-16 h-16 luxury-bg text-earth-50 rounded-2xl flex justify-center items-center mx-auto mb-5 text-2xl shadow-soft">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h2 class="font-display text-3xl font-semibold text-forest-700 mb-2">Private Itinerary</h2>
-            <p class="text-sm text-forest-400 mb-6">Enter password to view your trip</p>
-
-            <form onsubmit="checkPassword(event)" class="space-y-4">
-                <input type="password" id="password-input" required placeholder="Password..." class="w-full bg-earth-50 border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 text-center tracking-widest">
-                <p id="login-error" class="text-red-500 text-xs hidden">Incorrect password</p>
-                <button type="submit" class="w-full luxury-bg text-white font-semibold rounded-2xl py-3.5 shadow-soft hover:opacity-95 transition active:scale-95">
-                    Unlock
-                </button>
-            </form>
-        </div>
-    </div>
-
     <!-- Main App -->
-    <div id="main-app" class="app-container max-w-md mx-auto bg-earth-50 relative shadow-2xl hidden opacity-0 transition-opacity duration-500 overflow-hidden">
+    <div id="main-app" class="app-container max-w-md mx-auto bg-earth-50 relative shadow-2xl transition-opacity duration-500 overflow-hidden">
 
         <header class="luxury-bg text-white header-safe pb-6 px-6 shadow-md z-10 flex justify-between items-end rounded-b-[2rem]">
             <div>
@@ -224,7 +205,7 @@
             </div>
 
             <!-- Packing List Tab -->
-            <div id="view-packing" class="tab-view hidden space-y-4"></div>
+            <!-- <div id="view-packing" class="tab-view hidden space-y-4"></div> -->
 
             <!-- 實體透明隱形方塊 (Spacer)：徹底解決 iOS Safari 忽略 padding 導致底部被遮擋的問題 -->
             <div class="h-36 w-full shrink-0 pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);"></div>
@@ -232,7 +213,7 @@
 
         <!-- Bottom Navigation (Fixed to perfectly anchor at bottom) -->
         <nav class="nav-fixed z-20 max-w-md mx-auto px-5 pb-3">
-            <div class="bg-white/88 backdrop-blur-xl border border-earth-200 rounded-[1.75rem] px-4 py-2 flex justify-between items-center shadow-nav">
+            <div class="bg-white/88 backdrop-blur-xl border border-earth-200 rounded-[1.75rem] px-6 py-2 flex justify-around items-center shadow-nav">
                 <button onclick="switchTab('itinerary', 'Plan', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-white bg-forest-700 rounded-2xl w-16 min-h-[58px] transition shadow-soft">
                     <i class="fa-solid fa-route text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Plan</span>
@@ -244,10 +225,6 @@
                 <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-wallet text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Costs</span>
-                </button>
-                <button onclick="switchTab('packing', 'Pack', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
-                    <i class="fa-solid fa-suitcase-rolling text-lg mb-1"></i>
-                    <span class="text-[10px] font-semibold">Pack</span>
                 </button>
             </div>
         </nav>
@@ -298,8 +275,8 @@
 
         <!-- Add Expense Modal -->
         <div id="expense-modal" class="hidden fixed inset-0 bg-forest-900/45 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
-            <div class="modal-sheet w-full rounded-t-[2rem] p-6 shadow-2xl transform transition-transform translate-y-0">
-                <div class="flex justify-between items-center mb-6">
+            <div class="modal-sheet w-full rounded-t-[2rem] p-6 shadow-2xl transform transition-transform translate-y-0 h-[85vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 sticky top-0 modal-sheet pb-3 z-10 border-b border-earth-200">
                     <div>
                         <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Expense</p>
                         <h3 id="expense-modal-title" class="font-display text-3xl font-semibold text-forest-700">New Expense</h3>
@@ -368,27 +345,6 @@
             </div>
         </div>
 
-        <!-- Expense Action Sheet -->
-        <div id="expense-action-modal" class="hidden fixed inset-0 bg-forest-900/45 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
-            <div class="modal-sheet w-full rounded-t-[2rem] p-6 shadow-2xl">
-                <div class="mb-5">
-                    <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Expense Options</p>
-                    <h3 id="expense-action-title" class="font-display text-2xl font-semibold text-forest-700 leading-tight mt-1">Manage Expense</h3>
-                    <p id="expense-action-subtitle" class="text-xs text-gray-500 mt-1"></p>
-                </div>
-                <div class="space-y-3 mb-6">
-                    <button onclick="editSelectedExpense()" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 shadow-lg active:scale-95 transition">
-                        Edit Expense
-                    </button>
-                    <button onclick="deleteSelectedExpense()" class="w-full bg-white border border-red-200 text-red-600 font-semibold rounded-2xl py-4 shadow-sm hover:bg-red-50 active:scale-95 transition">
-                        Delete Expense
-                    </button>
-                    <button onclick="closeExpenseActionModal()" class="w-full bg-white border border-earth-200 text-forest-600 font-semibold rounded-2xl py-3 shadow-sm active:scale-95 transition">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
 
     </div>
 
@@ -403,39 +359,17 @@
         const APP_PASSWORD = "123"; 
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('isLoggedIn') === 'true') {
-                showMainApp();
-            }
+            showMainApp();
         });
 
-        function checkPassword(e) {
-            e.preventDefault();
-            const input = document.getElementById('password-input').value;
-            const errorMsg = document.getElementById('login-error');
-
-            if (input === APP_PASSWORD) {
-                sessionStorage.setItem('isLoggedIn', 'true');
-                showMainApp();
-            } else {
-                errorMsg.classList.remove('hidden');
-                document.getElementById('password-input').value = '';
-            }
-        }
-
         function showMainApp() {
-            const loginScreen = document.getElementById('login-screen');
             const mainApp = document.getElementById('main-app');
-
-            loginScreen.style.opacity = '0';
-            setTimeout(() => {
-                loginScreen.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                setTimeout(() => { mainApp.classList.remove('opacity-0'); }, 50);
-                initializeApp();
-            }, 300);
+            mainApp.classList.remove('hidden');
+            setTimeout(() => { mainApp.classList.remove('opacity-0'); }, 50);
+            initializeApp();
         }
 
-        let appData = { itinerary: [], accommodation: [], expenses: [], packing: [] };
+        let appData = { itinerary: [], accommodation: [], expenses: [] };
         let uniqueDays = [];
         let currentSelectedDate = '';
         let currentExpenseCurrency = 'CAD';
@@ -443,8 +377,6 @@
         const EXPENSE_PEOPLE = ['PWS', 'KCW', 'FST', 'KCH', 'CHM'];
         const CAD_TO_HKD_RATE = 5.7;
         let editingExpenseRowNumber = null;
-        let selectedExpenseForAction = null;
-        let expenseLongPressTimer = null;
 
         function initializeApp() {
             loadCachedData();
@@ -639,71 +571,6 @@
             });
         }
 
-        function openExpenseActionModal(item) {
-            if (!item || !item.__rowNumber) {
-                showToast('This expense cannot be edited yet. Please sync again.');
-                return;
-            }
-
-            selectedExpenseForAction = item;
-            const title = document.getElementById('expense-action-title');
-            const subtitle = document.getElementById('expense-action-subtitle');
-            if (title) title.innerText = item['Item / Description'] || item['Item'] || 'Expense';
-            if (subtitle) subtitle.innerText = `${item['Category'] || 'Others'} • ${formatExpenseAmount(getExpenseAmount(item))}`;
-            document.getElementById('expense-action-modal').classList.remove('hidden');
-        }
-
-        function closeExpenseActionModal() {
-            document.getElementById('expense-action-modal').classList.add('hidden');
-        }
-
-        function editSelectedExpense() {
-            if (!selectedExpenseForAction) return;
-            openExpenseEditModal(selectedExpenseForAction);
-            closeExpenseActionModal();
-        }
-
-        function deleteSelectedExpense() {
-            if (!selectedExpenseForAction) return;
-            deleteExpenseByRowNumber(selectedExpenseForAction.__rowNumber);
-        }
-
-        function openExpenseEditModal(item) {
-            editingExpenseRowNumber = item.__rowNumber;
-            document.getElementById('expense-modal').classList.remove('hidden');
-
-            const title = document.getElementById('expense-modal-title');
-            const submitBtn = document.getElementById('exp-submit-btn');
-            const deleteBtn = document.getElementById('exp-delete-btn');
-            if (title) title.innerText = 'Edit Expense';
-            if (submitBtn) submitBtn.innerHTML = '<span>Save Changes</span>';
-            if (deleteBtn) deleteBtn.classList.remove('hidden');
-
-            document.getElementById('exp-category').value = item['Category'] || '';
-            document.getElementById('exp-name').value = item['Item / Description'] || item['Item'] || '';
-            document.getElementById('exp-date').value = toDateInputValue(item['Date']);
-            document.getElementById('exp-nights').value = item['Nights'] || '';
-            document.getElementById('exp-amount').value = parseMoney(item['Total Cost (CAD)'] || item['Amount']) || '';
-            document.getElementById('exp-payby').value = item['Paid By'] || '';
-
-            const shareWith = getExpenseShareWith(item);
-            document.querySelectorAll('input[name="exp-sharewith"]').forEach(input => {
-                input.checked = shareWith.includes(input.value);
-            });
-
-            toggleNightsField();
-        }
-
-        function startExpenseLongPress(itemJson) {
-            clearTimeout(expenseLongPressTimer);
-            expenseLongPressTimer = setTimeout(() => {
-                openExpenseActionModal(itemJson);
-            }, 600);
-        }
-
-        function cancelExpenseLongPress() {
-            clearTimeout(expenseLongPressTimer);
-        }
 
         async function deleteCurrentEditingExpense() {
             if (!editingExpenseRowNumber) return;
@@ -724,10 +591,8 @@
                 if (json.status !== 'success') throw new Error(json.message || 'Failed to delete expense');
 
                 showToast('Expense Deleted');
-                closeExpenseActionModal();
                 closeExpenseModal();
                 editingExpenseRowNumber = null;
-                selectedExpenseForAction = null;
                 fetchDataFromSheet(true);
             } catch (error) {
                 alert('Failed to delete: ' + error.message);
@@ -930,14 +795,6 @@
                 </div>`;
             }).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
 
-            // Packing
-            const packContainer = document.getElementById('view-packing');
-            packContainer.innerHTML = appData.packing.map(item => `
-                <div class="luxury-card rounded-[1.25rem] flex items-center justify-between py-3.5 px-4">
-                    <div class="flex items-center gap-3"><input type="checkbox" ${item['Packed'] === true || item['Packed'] === 'TRUE' ? 'checked' : ''} class="w-5 h-5 text-forest-500 rounded border-earth-300 focus:ring-forest-500"><div><p class="font-semibold text-forest-900 text-sm">${item['Item'] || 'Item'}</p><p class="text-[10px] text-forest-600 bg-earth-100 px-2 py-0.5 rounded-full inline-block mt-1">${item['Category'] || 'General'}</p></div></div>
-                    <span class="text-xs text-gray-400">x${item['Quantity'] || 1}</span>
-                </div>
-            `).join('') || '<p class="text-center text-gray-400 mt-10">List is empty</p>';
         }
 
         function renderItineraryTab() {
