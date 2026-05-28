@@ -504,7 +504,7 @@
 
             const contentArea = document.querySelector('.content-area');
             if (contentArea) {
-                contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+                contentArea.scrollTop = 0;
             }
 
             const activeBtn = clickedBtn || document.querySelector(`.nav-btn[onclick*="'${tabId}'"]`);
