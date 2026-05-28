@@ -154,7 +154,7 @@
 
             <!-- Itinerary Tab -->
             <div id="view-itinerary" class="tab-view hidden space-y-4 pt-5">
-                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                <div class="luxury-bg text-white -mx-5 -mt-5 px-6 pt-[max(2.75rem,env(safe-area-inset-top))] pb-5 shadow-soft">
                     <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Trip Planner</p>
                     <h2 class="font-display text-3xl font-semibold leading-none mt-1">Plan</h2>
                 </div>
@@ -170,7 +170,7 @@
 
             <!-- Accommodation Tab -->
             <div id="view-accommodation" class="tab-view hidden space-y-4 pt-5">
-                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                <div class="luxury-bg text-white -mx-5 -mt-5 px-6 pt-[max(2.75rem,env(safe-area-inset-top))] pb-5 shadow-soft">
                     <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Stay Details</p>
                     <h2 class="font-display text-3xl font-semibold leading-none mt-1">Hotels</h2>
                 </div>
@@ -179,7 +179,7 @@
 
             <!-- Expenses Tab -->
             <div id="view-expenses" class="tab-view hidden space-y-4 pt-5">
-                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                <div class="luxury-bg text-white -mx-5 -mt-5 px-6 pt-[max(2.75rem,env(safe-area-inset-top))] pb-5 shadow-soft">
                     <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Shared Budget</p>
                     <h2 class="font-display text-3xl font-semibold leading-none mt-1">Costs</h2>
                 </div>
@@ -221,7 +221,7 @@
 
             <!-- Emergency Phone List Tab -->
             <div id="view-emergency" class="tab-view hidden space-y-4 pt-5">
-                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                <div class="luxury-bg text-white -mx-5 -mt-5 px-6 pt-[max(2.75rem,env(safe-area-inset-top))] pb-5 shadow-soft">
                     <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Quick Contacts</p>
                     <h2 class="font-display text-3xl font-semibold leading-none mt-1">SOS</h2>
                 </div>
@@ -1209,21 +1209,21 @@
                 .sort((a, b) => parseDateForSort(a) - parseDateForSort(b));
             const dayIndex = unique.length && dashboard.selectedDate ? unique.indexOf(dashboard.selectedDate) + 1 : '';
 
-            const periodCards = dashboard.records.map(record => {
-                const period = record['Period'] || record.Period || 'Period';
-                const destination = record['Destination'] || (record.isEmpty ? 'No plan yet' : 'TBD');
-                const activities = record['Activities & Reservations'] || '';
-                let icon = 'fa-sun';
-                if (period === 'Afternoon') icon = 'fa-cloud-sun';
-                if (period === 'Evening') icon = 'fa-moon';
-                return `
-                    <div class="bg-earth-50/92 border border-earth-200 rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
+                const periodCards = dashboard.records.map(record => {
+                    const period = record['Period'] || record.Period || 'Period';
+                    const destination = record['Destination'] || (record.isEmpty ? 'No plan yet' : 'TBD');
+                    const activities = record['Activities & Reservations'] || '';
+                    let icon = 'fa-sun';
+                    if (period === 'Afternoon') icon = 'fa-cloud-sun';
+                    if (period === 'Evening') icon = 'fa-moon';
+                    return `
+                    <div class="bg-earth-100/95 border border-earth-300 rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
                         <p class="text-[10px] uppercase tracking-[0.14em] text-forest-500 font-bold"><i class="fa-solid ${icon} mr-1 text-champagne"></i>${period}</p>
                         <h4 class="font-display text-lg font-semibold text-forest-900 leading-tight mt-2">${destination}</h4>
                         ${activities ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${activities}</p>` : '<p class="text-xs text-gray-400 mt-1">No details yet</p>'}
                     </div>
                 `;
-            }).join('');
+                }).join('');
 
             home.innerHTML = `
                 <section class="relative overflow-hidden min-h-[25rem] text-white -mx-5">
