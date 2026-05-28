@@ -1199,7 +1199,7 @@
                 if (period === 'Afternoon') icon = 'fa-cloud-sun';
                 if (period === 'Evening') icon = 'fa-moon';
                 return `
-                    <div class="bg-white border border-earth-100 rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
+                    <div class="bg-earth-50/92 border border-earth-200 rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
                         <p class="text-[10px] uppercase tracking-[0.14em] text-forest-500 font-bold"><i class="fa-solid ${icon} mr-1 text-champagne"></i>${period}</p>
                         <h4 class="font-display text-lg font-semibold text-forest-900 leading-tight mt-2">${destination}</h4>
                         ${activities ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${activities}</p>` : '<p class="text-xs text-gray-400 mt-1">No details yet</p>'}
@@ -1208,21 +1208,21 @@
             }).join('');
 
             home.innerHTML = `
-                <section class="relative overflow-hidden min-h-[24rem] shadow-luxury text-white -mx-5 rounded-b-[2.25rem]">
+                <section class="relative overflow-hidden min-h-[25rem] text-white -mx-5">
                     <div class="absolute inset-0 bg-[url('https://raw.githubusercontent.com/jessieszec/travel-web-app/main/squamish_banner_sunwolf.jpg')] bg-cover bg-center"></div>
-                    <div class="absolute inset-0 bg-gradient-to-b from-forest-900/15 via-forest-900/35 to-forest-900/88"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-forest-900/15 via-forest-900/35 to-forest-900/78"></div>
+                    <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-earth-50"></div>
                     <div class="relative p-6 pt-[max(3.25rem,env(safe-area-inset-top))] min-h-[24rem] flex flex-col justify-between">
                         <div class="flex justify-between items-start gap-3">
-                            <p class="text-[10px] uppercase tracking-[0.25em] text-earth-100/90 font-bold">Travel Companion</p>
+                            <p class="text-[10px] uppercase tracking-[0.25em] text-earth-100/90 font-bold">Travel Planner</p>
                             <button onclick="fetchDataFromSheet(true)" class="bg-white/85 text-forest-800 w-10 h-10 rounded-full shadow-soft text-sm flex items-center justify-center active:scale-95 transition">
                                 <i class="fa-solid fa-rotate-right"></i>
                             </button>
                         </div>
                         <div>
-                            <h2 class="font-display text-6xl font-semibold leading-none drop-shadow-sm">Squamish</h2>
+                            <h2 class="font-display text-6xl font-semibold leading-none drop-shadow-sm">Vancouver</h2>
                             <p class="font-display text-4xl italic text-champagne mt-1 drop-shadow-sm">Wedding Trip</p>
                             <p class="text-sm mt-5 flex items-center gap-2 text-white/95"><i class="fa-regular fa-calendar"></i>${range.label}</p>
-                            <p class="text-sm text-white/90 mt-3 leading-relaxed max-w-[18rem]">Your itinerary, bookings, shared costs and emergency contacts — all in one place.</p>
                         </div>
                     </div>
                 </section>
