@@ -571,6 +571,37 @@
             });
         }
 
+        function openExpenseEditModal(item) {
+            if (!item || !item.__rowNumber) {
+                showToast('This expense cannot be edited yet. Please sync again.');
+                return;
+            }
+
+            editingExpenseRowNumber = item.__rowNumber;
+            document.getElementById('expense-modal').classList.remove('hidden');
+
+            const title = document.getElementById('expense-modal-title');
+            const submitBtn = document.getElementById('exp-submit-btn');
+            const deleteBtn = document.getElementById('exp-delete-btn');
+
+            if (title) title.innerText = 'Edit Expense';
+            if (submitBtn) submitBtn.innerHTML = '<span>Save Changes</span>';
+            if (deleteBtn) deleteBtn.classList.remove('hidden');
+
+            document.getElementById('exp-category').value = item['Category'] || '';
+            document.getElementById('exp-name').value = item['Item / Description'] || item['Item'] || '';
+            document.getElementById('exp-date').value = toDateInputValue(item['Date']);
+            document.getElementById('exp-nights').value = item['Nights'] || '';
+            document.getElementById('exp-amount').value = parseMoney(item['Total Cost (CAD)'] || item['Amount']) || '';
+            document.getElementById('exp-payby').value = item['Paid By'] || '';
+
+            const shareWith = getExpenseShareWith(item);
+            document.querySelectorAll('input[name="exp-sharewith"]').forEach(input => {
+                input.checked = shareWith.includes(input.value);
+            });
+
+            toggleNightsField();
+        }
 
         async function deleteCurrentEditingExpense() {
             if (!editingExpenseRowNumber) return;
