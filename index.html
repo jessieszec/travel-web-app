@@ -439,6 +439,16 @@
         </div>
 
 
+        <!-- Home Plan Preview Modal -->
+        <div id="home-plan-preview-modal" class="hidden fixed inset-0 bg-forest-900/45 backdrop-blur-sm z-50 flex items-center justify-center px-5 max-w-md mx-auto">
+            <div class="luxury-card w-full max-h-[72vh] overflow-y-auto rounded-[2rem] p-5 shadow-2xl relative">
+                <button onclick="closeHomePlanPreview()" class="absolute top-4 right-4 text-forest-400 hover:text-forest-700 w-10 h-10 rounded-full bg-earth-50 border border-earth-200 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div id="home-plan-preview-content" class="pr-8"></div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Notification Toast -->
@@ -1299,7 +1309,7 @@
                     if (period === 'Afternoon') icon = 'fa-cloud-sun';
                     if (period === 'Evening') icon = 'fa-moon';
                     return `
-                    <div class="bg-[#E7ECE6]/95 border border-[#CBD8CC] rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
+                    <div onclick='openHomePlanPreview(${JSON.stringify(record).replace(/'/g, "&#39;")})' class="bg-[#E7ECE6]/95 border border-[#CBD8CC] rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1 cursor-pointer active:scale-[0.98] transition">
                         <p class="text-[10px] uppercase tracking-[0.14em] text-forest-500 font-bold"><i class="fa-solid ${icon} mr-1 text-champagne"></i>${period}</p>
                         <h4 class="font-display text-lg font-semibold text-forest-900 leading-tight mt-2">${destination}</h4>
                         ${activities ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${activities}</p>` : '<p class="text-xs text-gray-400 mt-1">No details yet</p>'}
@@ -1375,6 +1385,66 @@
                 </section>
             `;
         }
+        function openHomePlanPreview(record) {
+            if (!record || record.isEmpty) {
+                showToast('No plan details yet');
+                return;
+            }
+
+            const modal = document.getElementById('home-plan-preview-modal');
+            const content = document.getElementById('home-plan-preview-content');
+            if (!modal || !content) return;
+
+            const period = record['Period'] || 'Period';
+            const destination = record['Destination'] || 'TBD';
+            const activities = record['Activities & Reservations'] || '';
+            const note = record['Note'] || '';
+            const address = record['Address'] || '';
+            const link = record['Link'] || '';
+            const joining = record["Who's Joining"] || '';
+            const dateLabel = formatDashboardDate(record['Date']) || record['Date'] || '';
+
+            let icon = 'fa-sun';
+            if (period === 'Afternoon') icon = 'fa-cloud-sun';
+            if (period === 'Evening') icon = 'fa-moon';
+
+            content.innerHTML = `
+                <div class="mb-4">
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-forest-400 font-bold">${dateLabel}</p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <div class="w-12 h-12 rounded-2xl bg-earth-100 text-champagne flex items-center justify-center text-xl shadow-sm shrink-0">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-500 font-bold bg-earth-100 px-2 py-0.5 rounded-full inline-block">${period}</p>
+                            <h3 class="font-display text-3xl font-semibold text-forest-900 leading-tight mt-1">${destination}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                ${activities ? `<div class="mb-4"><p class="text-xs uppercase tracking-[0.14em] text-gray-400 font-bold mb-1">Activities</p><p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">${activities}</p></div>` : ''}
+
+                ${note ? `<div class="mb-4"><p class="text-xs uppercase tracking-[0.14em] text-gray-400 font-bold mb-1">Note</p><p class="text-sm text-gray-600 italic leading-relaxed whitespace-pre-line"><i class="fa-regular fa-comment-dots mr-1"></i>${note}</p></div>` : ''}
+
+                ${address ? `<div class="mb-4"><p class="text-xs uppercase tracking-[0.14em] text-gray-400 font-bold mb-1">Address</p><p class="text-sm text-gray-700 leading-relaxed">${address}</p></div>` : ''}
+
+                <div class="flex flex-wrap gap-2 mb-4">
+                    ${address ? `<button onclick="copyToClipboard('${address.replace(/'/g, "\\'")}', event)" class="flex-1 bg-white border border-earth-200 text-forest-700 py-2.5 px-3 rounded-xl text-sm font-semibold hover:bg-earth-50 transition"><i class="fa-regular fa-copy mr-2"></i>Copy</button>` : ''}
+                    ${address ? `<a onclick="preventProp(event)" href="https://maps.google.com/?q=${encodeURIComponent(address)}" target="_blank" class="flex-1 bg-earth-50 border border-earth-200 text-forest-700 py-2.5 px-3 rounded-xl text-sm font-semibold hover:bg-earth-100 transition flex justify-center items-center"><i class="fa-solid fa-map mr-2"></i>Map</a>` : ''}
+                    ${link ? `<a onclick="preventProp(event)" href="${link}" target="_blank" class="w-full bg-forest-700 text-white py-2.5 px-3 rounded-xl text-sm font-semibold hover:bg-forest-600 transition shadow-sm flex justify-center items-center"><i class="fa-solid fa-link mr-2"></i>View Booking</a>` : ''}
+                </div>
+
+                ${joining ? `<div class="pt-4 border-t border-earth-100"><p class="text-[10px] text-gray-400 mb-2 uppercase tracking-[0.12em]">Who's joining</p><div class="flex flex-wrap">${getParticipantTags(joining)}</div></div>` : ''}
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeHomePlanPreview() {
+            const modal = document.getElementById('home-plan-preview-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
         function getParticipantTags(str) {
             if (!str) return '';
 
