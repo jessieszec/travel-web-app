@@ -474,32 +474,96 @@
         const WEATHER_CACHE_HOURS = 24;
         const VANCOUVER_WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=49.2827&longitude=-123.1207&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&daily=sunrise,sunset&timezone=America%2FVancouver';
         let weatherData = null;
+        let currentTabId = 'home';
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const TAB_ORDER = ['home', 'itinerary', 'accommodation', 'expenses', 'emergency'];
 
         function initializeApp() {
             loadCachedData();
             loadCachedWeather();
             updateOnlineStatusBanner();
             renderHomeTab();
+            setupSwipeNavigation();
             fetchDataFromSheet();
             fetchWeatherData();
         }
         function switchTabFromHome(tabId, title) {
-            const btn = document.querySelector(`.nav-btn[onclick*="'${tabId}'"]`);
-            if (btn) switchTab(tabId, title, btn);
+            switchTab(tabId, title);
         }
 
         function switchTab(tabId, title, clickedBtn) {
+            currentTabId = tabId;
             document.getElementById('header-title').innerText = title;
             document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
-            document.getElementById(`view-${tabId}`).classList.add('fade-in');
+            const targetView = document.getElementById(`view-${tabId}`);
+            if (targetView) {
+                targetView.classList.remove('hidden');
+                targetView.classList.add('fade-in');
+            }
 
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            const activeBtn = clickedBtn || document.querySelector(`.nav-btn[onclick*="'${tabId}'"]`);
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-white', 'bg-forest-700', 'shadow-soft');
                 btn.classList.add('text-forest-500');
             });
-            clickedBtn.classList.remove('text-forest-500');
-            clickedBtn.classList.add('text-white', 'bg-forest-700', 'shadow-soft', 'rounded-2xl');
+            if (activeBtn) {
+                activeBtn.classList.remove('text-forest-500');
+                activeBtn.classList.add('text-white', 'bg-forest-700', 'shadow-soft', 'rounded-2xl');
+            }
+        }
+
+        function setupSwipeNavigation() {
+            const contentArea = document.querySelector('.content-area');
+            if (!contentArea) return;
+            if (contentArea.dataset.swipeReady === 'true') return;
+            contentArea.dataset.swipeReady = 'true';
+
+            contentArea.addEventListener('touchstart', (e) => {
+                if (e.target.closest('input, textarea, select, button, a, form, .modal-sheet')) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            contentArea.addEventListener('touchend', (e) => {
+                if (!touchStartX && !touchStartY) return;
+                if (e.target.closest('input, textarea, select, button, a, form, .modal-sheet')) {
+                    touchStartX = 0;
+                    touchStartY = 0;
+                    return;
+                }
+
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const diffX = touchEndX - touchStartX;
+                const diffY = touchEndY - touchStartY;
+
+                touchStartX = 0;
+                touchStartY = 0;
+
+                if (Math.abs(diffX) < 75 || Math.abs(diffX) < Math.abs(diffY) * 1.4) return;
+
+                const currentIndex = TAB_ORDER.indexOf(currentTabId);
+                if (currentIndex === -1) return;
+
+                const nextIndex = diffX < 0 ? currentIndex + 1 : currentIndex - 1;
+                if (nextIndex < 0 || nextIndex >= TAB_ORDER.length) return;
+
+                const nextTabId = TAB_ORDER[nextIndex];
+                const titleMap = {
+                    home: 'Home',
+                    itinerary: 'Plan',
+                    accommodation: 'Hotels',
+                    expenses: 'Costs',
+                    emergency: 'Emergency'
+                };
+                switchTab(nextTabId, titleMap[nextTabId] || nextTabId);
+            }, { passive: true });
         }
 
         function openExpenseModal() {
