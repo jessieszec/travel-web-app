@@ -204,6 +204,23 @@
                 <div id="expenses-list" class="space-y-3"></div>
             </div>
 
+            <!-- Emergency Phone List Tab -->
+            <div id="view-emergency" class="tab-view hidden space-y-4">
+                <div class="soft-panel rounded-[1.5rem] p-4 shadow-soft mb-2">
+                    <div class="flex justify-between items-start gap-3">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Quick Contacts</p>
+                            <h2 class="font-display text-2xl font-semibold text-forest-700">Emergency</h2>
+                        </div>
+                        <button onclick="openEmergencyModal()" class="luxury-bg text-white px-4 py-2.5 rounded-full text-sm font-semibold shadow-soft hover:opacity-95 transition active:scale-95">
+                            <i class="fa-solid fa-plus mr-1"></i> Add
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 leading-relaxed">Tap a contact to edit it, or tap the phone number to call.</p>
+                </div>
+                <div id="emergency-list" class="space-y-3"></div>
+            </div>
+
             <!-- Packing List Tab -->
             <!-- <div id="view-packing" class="tab-view hidden space-y-4"></div> -->
 
@@ -225,6 +242,10 @@
                 <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
                     <i class="fa-solid fa-wallet text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Costs</span>
+                </button>
+                <button onclick="switchTab('emergency', 'Emergency', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
+                    <i class="fa-solid fa-phone-volume text-lg mb-1"></i>
+                    <span class="text-[10px] font-semibold">SOS</span>
                 </button>
             </div>
         </nav>
@@ -346,6 +367,37 @@
         </div>
 
 
+        <!-- Add/Edit Emergency Phone Modal -->
+        <div id="emergency-modal" class="hidden fixed inset-0 bg-forest-900/45 backdrop-blur-sm z-50 flex items-end justify-center pb-0 max-w-md mx-auto">
+            <div class="modal-sheet w-full rounded-t-[2rem] p-6 shadow-2xl transform transition-transform translate-y-0 h-[72vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 sticky top-0 modal-sheet pb-3 z-10 border-b border-earth-200">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Emergency</p>
+                        <h3 id="emergency-modal-title" class="font-display text-3xl font-semibold text-forest-700">New Contact</h3>
+                    </div>
+                    <button onclick="closeEmergencyModal()" class="text-forest-400 hover:text-forest-700 p-3 rounded-full bg-white border border-earth-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+
+                <form id="emergency-form" class="space-y-4" onsubmit="submitEmergencyPhone(event)">
+                    <div>
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Who to Contact</label>
+                        <input type="text" id="emergency-contact" required placeholder="e.g. Police / Ambulance" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-forest-700 mb-1">Phone Number</label>
+                        <input type="tel" id="emergency-phone" required placeholder="e.g. 911" class="w-full bg-white border border-earth-200 rounded-2xl px-4 py-3 outline-none focus:border-forest-500 shadow-sm">
+                    </div>
+                    <button type="submit" id="emergency-submit-btn" class="w-full luxury-bg text-white font-semibold rounded-2xl py-4 mt-4 shadow-lg hover:opacity-95 transition active:scale-95 flex justify-center items-center">
+                        <span>Save Contact</span>
+                    </button>
+                    <button type="button" id="emergency-delete-btn" onclick="deleteCurrentEmergencyPhone()" class="hidden w-full bg-white border border-red-200 text-red-600 font-semibold rounded-2xl py-3 shadow-sm hover:bg-red-50 transition active:scale-95 mb-8">
+                        Delete Contact
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
     </div>
 
     <!-- Notification Toast -->
@@ -369,7 +421,7 @@
             initializeApp();
         }
 
-        let appData = { itinerary: [], accommodation: [], expenses: [] };
+        let appData = { itinerary: [], accommodation: [], expenses: [], emergency: [] };
         let uniqueDays = [];
         let currentSelectedDate = '';
         let currentExpenseCurrency = 'CAD';
@@ -377,6 +429,7 @@
         const EXPENSE_PEOPLE = ['PWS', 'KCW', 'FST', 'KCH', 'CHM'];
         const CAD_TO_HKD_RATE = 5.7;
         let editingExpenseRowNumber = null;
+        let editingEmergencyRowNumber = null;
 
         function initializeApp() {
             loadCachedData();
@@ -419,6 +472,48 @@
             if (title) title.innerText = 'New Expense';
             if (submitBtn) submitBtn.innerHTML = '<span>Save Record</span>';
             if (deleteBtn) deleteBtn.classList.add('hidden');
+        }
+
+        function openEmergencyModal() {
+            resetEmergencyFormForAdd();
+            document.getElementById('emergency-modal').classList.remove('hidden');
+        }
+
+        function closeEmergencyModal() {
+            document.getElementById('emergency-modal').classList.add('hidden');
+        }
+
+        function resetEmergencyFormForAdd() {
+            editingEmergencyRowNumber = null;
+            const form = document.getElementById('emergency-form');
+            if (form) form.reset();
+            const title = document.getElementById('emergency-modal-title');
+            const submitBtn = document.getElementById('emergency-submit-btn');
+            const deleteBtn = document.getElementById('emergency-delete-btn');
+            if (title) title.innerText = 'New Contact';
+            if (submitBtn) submitBtn.innerHTML = '<span>Save Contact</span>';
+            if (deleteBtn) deleteBtn.classList.add('hidden');
+        }
+
+        function openEmergencyEditModal(item) {
+            if (!item || !item.__rowNumber) {
+                showToast('This contact cannot be edited yet. Please sync again.');
+                return;
+            }
+
+            editingEmergencyRowNumber = item.__rowNumber;
+            document.getElementById('emergency-modal').classList.remove('hidden');
+
+            const title = document.getElementById('emergency-modal-title');
+            const submitBtn = document.getElementById('emergency-submit-btn');
+            const deleteBtn = document.getElementById('emergency-delete-btn');
+
+            if (title) title.innerText = 'Edit Contact';
+            if (submitBtn) submitBtn.innerHTML = '<span>Save Changes</span>';
+            if (deleteBtn) deleteBtn.classList.remove('hidden');
+
+            document.getElementById('emergency-contact').value = item['Who to Contact'] || '';
+            document.getElementById('emergency-phone').value = item['Phone Number'] || '';
         }
 
         function toggleNightsField() {
@@ -630,6 +725,69 @@
             }
         }
 
+        async function submitEmergencyPhone(e) {
+            e.preventDefault();
+            const btn = document.getElementById('emergency-submit-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+
+            const isEditing = Boolean(editingEmergencyRowNumber);
+            const payload = {
+                action: isEditing ? 'updateEmergencyPhone' : 'addEmergencyPhone',
+                rowNumber: editingEmergencyRowNumber,
+                contactName: document.getElementById('emergency-contact').value,
+                phoneNumber: document.getElementById('emergency-phone').value
+            };
+
+            try {
+                if(!GAS_WEBAPP_URL.startsWith('http')) throw new Error('URL not set');
+                const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const json = await res.json();
+
+                if(json.status !== 'success') {
+                    throw new Error(json.message || 'Failed to save contact');
+                }
+
+                showToast(isEditing ? 'Contact Updated' : 'Contact Added');
+                document.getElementById('emergency-form').reset();
+                editingEmergencyRowNumber = null;
+                closeEmergencyModal();
+                fetchDataFromSheet(true);
+            } catch (error) {
+                alert('Failed to save contact: ' + error.message);
+            } finally {
+                btn.innerHTML = '<span>Save Contact</span>';
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteCurrentEmergencyPhone() {
+            if (!editingEmergencyRowNumber) return;
+            await deleteEmergencyPhoneByRowNumber(editingEmergencyRowNumber);
+        }
+
+        async function deleteEmergencyPhoneByRowNumber(rowNumber) {
+            if (!rowNumber) return;
+            const confirmed = confirm('Delete this emergency contact? This will remove the row from Google Sheet.');
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(GAS_WEBAPP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'deleteEmergencyPhone', rowNumber: rowNumber })
+                });
+                const json = await res.json();
+                if (json.status !== 'success') throw new Error(json.message || 'Failed to delete contact');
+
+                showToast('Contact Deleted');
+                closeEmergencyModal();
+                editingEmergencyRowNumber = null;
+                fetchDataFromSheet(true);
+            } catch (error) {
+                alert('Failed to delete contact: ' + error.message);
+            }
+        }
+
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.innerText = message;
@@ -825,6 +983,35 @@
                     ${sharedWith.length ? `<div class="mt-3 pt-3 border-t border-earth-100"><p class="text-[10px] text-gray-400 mb-1 uppercase tracking-[0.12em]">Share with</p><div class="flex flex-wrap">${getParticipantTags(sharedWith.join(','))}</div></div>` : ''}
                 </div>`;
             }).join('') || '<p class="text-center text-gray-400 mt-10">No records</p>';
+
+            // Emergency Phone List
+            const emergencyContainer = document.getElementById('emergency-list');
+            if (emergencyContainer) {
+                const emergencyRows = appData.emergency || [];
+                emergencyContainer.innerHTML = emergencyRows.map(item => {
+                    const contactName = item['Who to Contact'] || 'Emergency Contact';
+                    const phoneNumber = item['Phone Number'] || '';
+                    const safeItemJson = JSON.stringify(item).replace(/'/g, "&#39;");
+                    const safePhone = String(phoneNumber).replace(/[^0-9+]/g, '');
+
+                    return `
+                    <div onclick='openEmergencyEditModal(${safeItemJson})' class="luxury-card rounded-[1.35rem] p-4 cursor-pointer active:scale-[0.98] transition">
+                        <div class="flex justify-between items-start gap-3">
+                            <div class="flex items-start min-w-0">
+                                <div class="bg-earth-100 text-forest-700 w-11 h-11 rounded-2xl flex justify-center items-center mr-3 text-lg shadow-sm shrink-0">
+                                    <i class="fa-solid fa-phone-volume"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-[10px] uppercase tracking-[0.14em] text-forest-400 font-bold">Emergency Contact</p>
+                                    <h4 class="font-semibold text-forest-900 text-sm leading-snug">${contactName}</h4>
+                                    <p class="text-[11px] text-gray-500 mt-1">${phoneNumber}</p>
+                                </div>
+                            </div>
+                            ${phoneNumber ? `<a onclick="preventProp(event)" href="tel:${safePhone}" class="bg-forest-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm shrink-0"><i class="fa-solid fa-phone"></i></a>` : ''}
+                        </div>
+                    </div>`;
+                }).join('') || '<p class="text-center text-gray-400 mt-10">No emergency contacts found</p>';
+            }
 
         }
 
