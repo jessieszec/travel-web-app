@@ -139,18 +139,12 @@
     <!-- Main App -->
     <div id="main-app" class="app-container max-w-md mx-auto bg-earth-50 relative shadow-2xl transition-opacity duration-500 overflow-hidden">
 
-        <header class="luxury-bg text-white header-safe pb-6 px-6 shadow-md z-10 flex justify-between items-end rounded-b-[2rem]">
-            <div>
-                <p class="text-[10px] uppercase tracking-[0.25em] text-earth-300 mb-1">Travel Companion</p>
-                <h1 id="header-title" class="font-display text-4xl font-semibold tracking-tight leading-none">Home</h1>
-                <p id="sync-status" class="text-xs text-earth-100/90 mt-3"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
-            </div>
-            <button onclick="fetchDataFromSheet(true)" class="text-earth-100 hover:text-white p-3 rounded-full bg-white/8 border border-white/10 active:scale-95 transition">
-                <i class="fa-solid fa-rotate-right"></i>
-            </button>
+        <header class="hidden">
+            <h1 id="header-title">Home</h1>
+            <p id="sync-status"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
         </header>
 
-        <main class="content-area p-5 pt-6">
+        <main class="content-area p-5 pt-0">
             <!-- Home Tab -->
             <div id="view-home" class="tab-view space-y-4">
                 <div id="home-dashboard" class="space-y-4">
@@ -1205,39 +1199,45 @@
                 if (period === 'Afternoon') icon = 'fa-cloud-sun';
                 if (period === 'Evening') icon = 'fa-moon';
                 return `
-                    <div class="bg-white/85 border border-earth-200 rounded-2xl p-3 shadow-sm min-w-[8.5rem] flex-1">
+                    <div class="bg-white border border-earth-100 rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
                         <p class="text-[10px] uppercase tracking-[0.14em] text-forest-500 font-bold"><i class="fa-solid ${icon} mr-1 text-champagne"></i>${period}</p>
                         <h4 class="font-display text-lg font-semibold text-forest-900 leading-tight mt-2">${destination}</h4>
-                        ${activities ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${activities}</p>` : ''}
+                        ${activities ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${activities}</p>` : '<p class="text-xs text-gray-400 mt-1">No details yet</p>'}
                     </div>
                 `;
             }).join('');
 
             home.innerHTML = `
-                <section class="relative overflow-hidden rounded-[2rem] min-h-[20rem] shadow-luxury text-white -mx-1">
+                <section class="relative overflow-hidden min-h-[24rem] shadow-luxury text-white -mx-5 rounded-b-[2.25rem]">
                     <div class="absolute inset-0 bg-[url('https://raw.githubusercontent.com/jessieszec/travel-web-app/main/squamish_banner_sunwolf.jpg')] bg-cover bg-center"></div>
-                    <div class="absolute inset-0 bg-gradient-to-b from-forest-900/20 via-forest-900/35 to-forest-900/85"></div>
-                    <div class="relative p-5 pt-6 min-h-[20rem] flex flex-col justify-between">
-                        <div class="self-end bg-white/85 text-forest-800 rounded-2xl px-3 py-2 shadow-soft text-xs">
-                            <i class="fa-solid fa-circle-check text-forest-600 mr-1"></i>${navigator.onLine ? 'Online' : 'Offline'} • Saved
+                    <div class="absolute inset-0 bg-gradient-to-b from-forest-900/15 via-forest-900/35 to-forest-900/88"></div>
+                    <div class="relative p-6 pt-[max(3.25rem,env(safe-area-inset-top))] min-h-[24rem] flex flex-col justify-between">
+                        <div class="flex justify-between items-start gap-3">
+                            <p class="text-[10px] uppercase tracking-[0.25em] text-earth-100/90 font-bold">Travel Companion</p>
+                            <button onclick="fetchDataFromSheet(true)" class="bg-white/85 text-forest-800 w-10 h-10 rounded-full shadow-soft text-sm flex items-center justify-center active:scale-95 transition">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-[0.25em] text-earth-200 font-bold">Travel Companion</p>
-                            <h2 class="font-display text-5xl font-semibold leading-none mt-2">Squamish</h2>
-                            <p class="font-display text-3xl italic text-champagne mt-1">Wedding Trip</p>
-                            <p class="text-sm mt-4"><i class="fa-regular fa-calendar mr-2"></i>${range.label}</p>
-                            <p class="text-sm text-white/85 mt-3 leading-relaxed">Your itinerary, bookings, shared costs and emergency contacts — saved in one place.</p>
+                            <h2 class="font-display text-6xl font-semibold leading-none drop-shadow-sm">Squamish</h2>
+                            <p class="font-display text-4xl italic text-champagne mt-1 drop-shadow-sm">Wedding Trip</p>
+                            <p class="text-sm mt-5 flex items-center gap-2 text-white/95"><i class="fa-regular fa-calendar"></i>${range.label}</p>
+                            <p class="text-sm text-white/90 mt-3 leading-relaxed max-w-[18rem]">Your itinerary, bookings, shared costs and emergency contacts — all in one place.</p>
                         </div>
                     </div>
                 </section>
 
-                <section class="luxury-card rounded-[1.5rem] p-4">
-                    <div class="flex justify-between items-center mb-4">
+                <section class="mt-5">
+                    ${renderWeatherCard()}
+                </section>
+
+                <section class="luxury-card rounded-[1.65rem] p-4">
+                    <div class="flex justify-between items-start mb-4 gap-3">
                         <div>
-                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Today's Plan</p>
-                            <h3 class="font-display text-2xl font-semibold text-forest-800">${formatDashboardDate(dashboard.selectedDate) || 'Plan Preview'}</h3>
+                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold"><i class="fa-regular fa-calendar mr-1"></i>Today's Plan</p>
+                            <h3 class="font-display text-2xl font-semibold text-forest-800 mt-1">${formatDashboardDate(dashboard.selectedDate) || 'Plan Preview'}</h3>
                         </div>
-                        <div class="text-right text-xs text-gray-500">
+                        <div class="text-right text-xs text-gray-500 bg-earth-50 border border-earth-100 rounded-2xl px-3 py-2 shrink-0">
                             <p>${dayIndex ? `Day ${dayIndex}` : 'Next plan'}</p>
                             <p>${daysText}</p>
                         </div>
@@ -1248,33 +1248,31 @@
                     </button>
                 </section>
 
-                <section class="luxury-card rounded-[1.5rem] p-4">
+                <section class="luxury-card rounded-[1.65rem] p-4">
                     <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold mb-3">Quick Access</p>
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="switchTabFromHome('itinerary', 'Plan')" class="bg-earth-50 border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
                             <div class="w-10 h-10 rounded-2xl bg-[#DCE7DF] text-forest-700 flex items-center justify-center mb-3"><i class="fa-solid fa-route"></i></div>
-                            <p class="font-display text-xl font-semibold text-forest-900">Plan</p>
+                            <div class="flex justify-between items-center gap-2"><p class="font-display text-xl font-semibold text-forest-900">Plan</p><i class="fa-solid fa-chevron-right text-xs text-forest-400"></i></div>
                             <p class="text-xs text-gray-500">Itinerary & Activities</p>
                         </button>
                         <button onclick="switchTabFromHome('accommodation', 'Hotels')" class="bg-earth-50 border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
                             <div class="w-10 h-10 rounded-2xl bg-[#EFE3CF] text-forest-700 flex items-center justify-center mb-3"><i class="fa-solid fa-bed"></i></div>
-                            <p class="font-display text-xl font-semibold text-forest-900">Hotels</p>
+                            <div class="flex justify-between items-center gap-2"><p class="font-display text-xl font-semibold text-forest-900">Hotels</p><i class="fa-solid fa-chevron-right text-xs text-forest-400"></i></div>
                             <p class="text-xs text-gray-500">Accommodation Details</p>
                         </button>
                         <button onclick="switchTabFromHome('expenses', 'Costs')" class="bg-earth-50 border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
                             <div class="w-10 h-10 rounded-2xl bg-[#DCE7DF] text-forest-700 flex items-center justify-center mb-3"><i class="fa-solid fa-wallet"></i></div>
-                            <p class="font-display text-xl font-semibold text-forest-900">Costs</p>
+                            <div class="flex justify-between items-center gap-2"><p class="font-display text-xl font-semibold text-forest-900">Costs</p><i class="fa-solid fa-chevron-right text-xs text-forest-400"></i></div>
                             <p class="text-xs text-gray-500">Expenses & Sharing</p>
                         </button>
                         <button onclick="switchTabFromHome('emergency', 'Emergency')" class="bg-[#F4E8E2] border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
                             <div class="w-10 h-10 rounded-2xl bg-[#D68A73] text-white flex items-center justify-center mb-3"><i class="fa-solid fa-phone-volume"></i></div>
-                            <p class="font-display text-xl font-semibold text-forest-900">SOS</p>
+                            <div class="flex justify-between items-center gap-2"><p class="font-display text-xl font-semibold text-forest-900">SOS</p><i class="fa-solid fa-chevron-right text-xs text-forest-400"></i></div>
                             <p class="text-xs text-gray-500">Emergency Phone List</p>
                         </button>
                     </div>
                 </section>
-
-                ${renderWeatherCard()}
             `;
         }
         function getParticipantTags(str) {
