@@ -153,7 +153,11 @@
             </div>
 
             <!-- Itinerary Tab -->
-            <div id="view-itinerary" class="tab-view hidden space-y-4">
+            <div id="view-itinerary" class="tab-view hidden space-y-4 pt-5">
+                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                    <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Trip Planner</p>
+                    <h2 class="font-display text-3xl font-semibold leading-none mt-1">Plan</h2>
+                </div>
                 <!-- Calendar Strip -->
                 <div id="calendar-strip" class="flex space-x-3 overflow-x-auto hide-scroll pb-3 -mx-5 px-5">
                     <!-- Days will be injected here -->
@@ -165,10 +169,20 @@
             </div>
 
             <!-- Accommodation Tab -->
-            <div id="view-accommodation" class="tab-view hidden space-y-4"></div>
+            <div id="view-accommodation" class="tab-view hidden space-y-4 pt-5">
+                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                    <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Stay Details</p>
+                    <h2 class="font-display text-3xl font-semibold leading-none mt-1">Hotels</h2>
+                </div>
+                <div id="accommodation-list" class="space-y-4"></div>
+            </div>
 
             <!-- Expenses Tab -->
-            <div id="view-expenses" class="tab-view hidden space-y-4">
+            <div id="view-expenses" class="tab-view hidden space-y-4 pt-5">
+                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                    <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Shared Budget</p>
+                    <h2 class="font-display text-3xl font-semibold leading-none mt-1">Costs</h2>
+                </div>
                 <div class="soft-panel rounded-[1.5rem] p-4 shadow-soft mb-2">
                     <div class="flex justify-between items-start gap-3">
                         <div>
@@ -206,7 +220,11 @@
             </div>
 
             <!-- Emergency Phone List Tab -->
-            <div id="view-emergency" class="tab-view hidden space-y-4">
+            <div id="view-emergency" class="tab-view hidden space-y-4 pt-5">
+                <div class="luxury-bg text-white rounded-[1.5rem] px-5 py-4 shadow-soft">
+                    <p class="text-[10px] uppercase tracking-[0.22em] text-earth-300 font-bold">Quick Contacts</p>
+                    <h2 class="font-display text-3xl font-semibold leading-none mt-1">SOS</h2>
+                </div>
                 <div class="soft-panel rounded-[1.5rem] p-4 shadow-soft mb-2">
                     <div class="flex justify-between items-start gap-3">
                         <div>
@@ -1211,8 +1229,8 @@
                 <section class="relative overflow-hidden min-h-[25rem] text-white -mx-5">
                     <div class="absolute inset-0 bg-[url('https://raw.githubusercontent.com/jessieszec/travel-web-app/main/squamish_banner_sunwolf.jpg')] bg-cover bg-center"></div>
                     <div class="absolute inset-0 bg-gradient-to-b from-forest-900/15 via-forest-900/35 to-forest-900/78"></div>
-                    <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-earth-50"></div>
-                    <div class="relative p-6 pt-[max(3.25rem,env(safe-area-inset-top))] min-h-[24rem] flex flex-col justify-between">
+                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-earth-50"></div>
+                    <div class="relative p-6 pt-[max(3.25rem,env(safe-area-inset-top))] pb-24 min-h-[25rem] flex flex-col justify-between">
                         <div class="flex justify-between items-start gap-3">
                             <p class="text-[10px] uppercase tracking-[0.25em] text-earth-100/90 font-bold">Travel Planner</p>
                             <button onclick="fetchDataFromSheet(true)" class="bg-white/85 text-forest-800 w-10 h-10 rounded-full shadow-soft text-sm flex items-center justify-center active:scale-95 transition">
@@ -1308,7 +1326,7 @@
             renderItineraryTab();
 
             // Accommodation
-            const accContainer = document.getElementById('view-accommodation');
+            const accContainer = document.getElementById('accommodation-list');
             let sortedAcc = [];
             if(appData.accommodation && appData.accommodation.length > 0) {
                 sortedAcc = [...appData.accommodation].sort((a, b) => parseDateForSort(a['Check-date']) - parseDateForSort(b['Check-date']));
