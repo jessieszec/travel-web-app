@@ -251,7 +251,7 @@
             <!-- <div id="view-packing" class="tab-view hidden space-y-4"></div> -->
 
             <!-- 實體透明隱形方塊 (Spacer)：徹底解決 iOS Safari 忽略 padding 導致底部被遮擋的問題 -->
-            <div class="h-36 w-full shrink-0 pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);"></div>
+            <div class="h-24 w-full shrink-0 pointer-events-none" style="padding-bottom: env(safe-area-inset-bottom);"></div>
         </main>
 
         <!-- Bottom Navigation (Fixed to perfectly anchor at bottom) -->
@@ -1224,7 +1224,7 @@
                     if (period === 'Afternoon') icon = 'fa-cloud-sun';
                     if (period === 'Evening') icon = 'fa-moon';
                     return `
-                    <div class="bg-earth-100/95 border border-earth-300 rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
+                    <div class="bg-[#E7ECE6]/95 border border-[#CBD8CC] rounded-2xl p-4 shadow-sm min-w-[9.25rem] flex-1">
                         <p class="text-[10px] uppercase tracking-[0.14em] text-forest-500 font-bold"><i class="fa-solid ${icon} mr-1 text-champagne"></i>${period}</p>
                         <h4 class="font-display text-lg font-semibold text-forest-900 leading-tight mt-2">${destination}</h4>
                         ${activities ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${activities}</p>` : '<p class="text-xs text-gray-400 mt-1">No details yet</p>'}
