@@ -142,7 +142,7 @@
         <header class="luxury-bg text-white header-safe pb-6 px-6 shadow-md z-10 flex justify-between items-end rounded-b-[2rem]">
             <div>
                 <p class="text-[10px] uppercase tracking-[0.25em] text-earth-300 mb-1">Travel Companion</p>
-                <h1 id="header-title" class="font-display text-4xl font-semibold tracking-tight leading-none">Plan</h1>
+                <h1 id="header-title" class="font-display text-4xl font-semibold tracking-tight leading-none">Home</h1>
                 <p id="sync-status" class="text-xs text-earth-100/90 mt-3"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>Preparing sync...</p>
             </div>
             <button onclick="fetchDataFromSheet(true)" class="text-earth-100 hover:text-white p-3 rounded-full bg-white/8 border border-white/10 active:scale-95 transition">
@@ -151,8 +151,15 @@
         </header>
 
         <main class="content-area p-5 pt-6">
+            <!-- Home Tab -->
+            <div id="view-home" class="tab-view space-y-4">
+                <div id="home-dashboard" class="space-y-4">
+                    <p class="text-center text-gray-400 mt-10">Preparing your trip dashboard...</p>
+                </div>
+            </div>
+
             <!-- Itinerary Tab -->
-            <div id="view-itinerary" class="tab-view space-y-4">
+            <div id="view-itinerary" class="tab-view hidden space-y-4">
                 <!-- Calendar Strip -->
                 <div id="calendar-strip" class="flex space-x-3 overflow-x-auto hide-scroll pb-3 -mx-5 px-5">
                     <!-- Days will be injected here -->
@@ -230,20 +237,24 @@
 
         <!-- Bottom Navigation (Fixed to perfectly anchor at bottom) -->
         <nav class="nav-fixed z-20 max-w-md mx-auto px-5 pb-3">
-            <div class="bg-white/88 backdrop-blur-xl border border-earth-200 rounded-[1.75rem] px-6 py-2 flex justify-around items-center shadow-nav">
-                <button onclick="switchTab('itinerary', 'Plan', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-white bg-forest-700 rounded-2xl w-16 min-h-[58px] transition shadow-soft">
+            <div class="bg-white/88 backdrop-blur-xl border border-earth-200 rounded-[1.75rem] px-3 py-2 flex justify-around items-center shadow-nav">
+                <button onclick="switchTab('home', 'Home', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-white bg-forest-700 rounded-2xl w-14 min-h-[58px] transition shadow-soft">
+                    <i class="fa-solid fa-house text-lg mb-1"></i>
+                    <span class="text-[10px] font-semibold">Home</span>
+                </button>
+                <button onclick="switchTab('itinerary', 'Plan', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-14 min-h-[58px] transition">
                     <i class="fa-solid fa-route text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Plan</span>
                 </button>
-                <button onclick="switchTab('accommodation', 'Hotels', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
+                <button onclick="switchTab('accommodation', 'Hotels', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-14 min-h-[58px] transition">
                     <i class="fa-solid fa-bed text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Hotels</span>
                 </button>
-                <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
+                <button onclick="switchTab('expenses', 'Costs', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-14 min-h-[58px] transition">
                     <i class="fa-solid fa-wallet text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">Costs</span>
                 </button>
-                <button onclick="switchTab('emergency', 'Emergency', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-16 min-h-[58px] transition">
+                <button onclick="switchTab('emergency', 'Emergency', this)" class="nav-btn flex flex-col items-center justify-center p-2 text-forest-500 hover:text-white rounded-2xl w-14 min-h-[58px] transition">
                     <i class="fa-solid fa-phone-volume text-lg mb-1"></i>
                     <span class="text-[10px] font-semibold">SOS</span>
                 </button>
@@ -430,11 +441,21 @@
         const CAD_TO_HKD_RATE = 5.7;
         let editingExpenseRowNumber = null;
         let editingEmergencyRowNumber = null;
+        const WEATHER_CACHE_HOURS = 24;
+        const VANCOUVER_WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=49.2827&longitude=-123.1207&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&daily=sunrise,sunset&timezone=America%2FVancouver';
+        let weatherData = null;
 
         function initializeApp() {
             loadCachedData();
+            loadCachedWeather();
             updateOnlineStatusBanner();
+            renderHomeTab();
             fetchDataFromSheet();
+            fetchWeatherData();
+        }
+        function switchTabFromHome(tabId, title) {
+            const btn = document.querySelector(`.nav-btn[onclick*="'${tabId}'"]`);
+            if (btn) switchTab(tabId, title, btn);
         }
 
         function switchTab(tabId, title, clickedBtn) {
@@ -982,6 +1003,7 @@
         }
 
         function renderAllData() {
+            renderHomeTab();
             renderItineraryTab();
 
             // Accommodation
@@ -1357,3 +1379,310 @@
     </script>
 </body>
 </html>
+
+        function parseTripDate(dateStr) {
+            if (!dateStr) return null;
+            if (typeof dateStr === 'string' && dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+                }
+            }
+            const parsed = new Date(dateStr);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        function formatLongDate(dateObj) {
+            if (!dateObj) return '';
+            return dateObj.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatDashboardDate(dateStr) {
+            const d = parseTripDate(dateStr);
+            if (!d) return dateStr || '';
+            return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function getTripDateRange() {
+            const dates = (appData.itinerary || [])
+                .map(item => parseTripDate(item['Date']))
+                .filter(Boolean)
+                .sort((a, b) => a - b);
+
+            if (!dates.length) return { start: null, end: null, label: 'Trip dates pending' };
+            const start = dates[0];
+            const end = dates[dates.length - 1];
+            return { start, end, label: `${formatLongDate(start)} – ${formatLongDate(end)}` };
+        }
+
+        function getDashboardDate() {
+            const itinerary = appData.itinerary || [];
+            const unique = Array.from(new Set(itinerary.map(item => item['Date']).filter(Boolean)))
+                .sort((a, b) => parseDateForSort(a) - parseDateForSort(b));
+
+            if (!unique.length) return '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const firstDate = parseTripDate(unique[0]);
+            const lastDate = parseTripDate(unique[unique.length - 1]);
+            if (!firstDate || !lastDate) return unique[0];
+
+            if (today < firstDate) return unique[0];
+            if (today > lastDate) return unique[unique.length - 1];
+
+            const todayString = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+            if (unique.includes(todayString)) return todayString;
+
+            const nextDate = unique.find(dateStr => {
+                const d = parseTripDate(dateStr);
+                return d && d >= today;
+            });
+            return nextDate || unique[0];
+        }
+
+        function getDashboardPlanRecords() {
+            const selectedDate = getDashboardDate();
+            const records = (appData.itinerary || []).filter(item => item['Date'] === selectedDate);
+            const periods = ['Morning', 'Afternoon', 'Evening'];
+            return {
+                selectedDate,
+                records: periods.map(period => records.find(item => String(item['Period']).trim() === period) || { Period: period, isEmpty: true })
+            };
+        }
+
+        function getDaysUntilTripText() {
+            const range = getTripDateRange();
+            if (!range.start || !range.end) return '';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            range.start.setHours(0, 0, 0, 0);
+            range.end.setHours(0, 0, 0, 0);
+
+            const diff = Math.ceil((range.start - today) / (1000 * 60 * 60 * 24));
+            if (diff > 1) return `${diff} days to go`;
+            if (diff === 1) return '1 day to go';
+            if (today >= range.start && today <= range.end) return 'Trip in progress';
+            return 'Trip completed';
+        }
+
+        function getWeatherDescription(code) {
+            const map = {
+                0: ['Sunny', 'fa-sun'],
+                1: ['Mainly clear', 'fa-cloud-sun'],
+                2: ['Partly cloudy', 'fa-cloud-sun'],
+                3: ['Cloudy', 'fa-cloud'],
+                45: ['Foggy', 'fa-smog'],
+                48: ['Foggy', 'fa-smog'],
+                51: ['Light drizzle', 'fa-cloud-rain'],
+                53: ['Drizzle', 'fa-cloud-rain'],
+                55: ['Heavy drizzle', 'fa-cloud-rain'],
+                61: ['Light rain', 'fa-cloud-rain'],
+                63: ['Rain', 'fa-cloud-showers-heavy'],
+                65: ['Heavy rain', 'fa-cloud-showers-heavy'],
+                71: ['Light snow', 'fa-snowflake'],
+                73: ['Snow', 'fa-snowflake'],
+                75: ['Heavy snow', 'fa-snowflake'],
+                80: ['Rain showers', 'fa-cloud-rain'],
+                81: ['Rain showers', 'fa-cloud-showers-heavy'],
+                82: ['Heavy showers', 'fa-cloud-showers-heavy'],
+                95: ['Thunderstorm', 'fa-cloud-bolt']
+            };
+            return map[code] || ['Weather', 'fa-cloud-sun'];
+        }
+
+        function loadCachedWeather() {
+            const cached = localStorage.getItem('travelAppWeatherData');
+            if (!cached) return false;
+            try {
+                const parsed = JSON.parse(cached);
+                weatherData = parsed;
+                return true;
+            } catch (error) {
+                console.error('Weather cache parse error:', error);
+                return false;
+            }
+        }
+
+        function saveWeatherToCache(data) {
+            weatherData = data;
+            localStorage.setItem('travelAppWeatherData', JSON.stringify(data));
+            localStorage.setItem('travelAppWeatherSyncedAt', new Date().toISOString());
+        }
+
+        function shouldRefreshWeather() {
+            const last = localStorage.getItem('travelAppWeatherSyncedAt');
+            if (!last) return true;
+            const lastDate = new Date(last);
+            if (isNaN(lastDate.getTime())) return true;
+            const ageHours = (Date.now() - lastDate.getTime()) / (1000 * 60 * 60);
+            return ageHours >= WEATHER_CACHE_HOURS;
+        }
+
+        async function fetchWeatherData() {
+            loadCachedWeather();
+            renderHomeTab();
+
+            if (!navigator.onLine || !shouldRefreshWeather()) return;
+
+            try {
+                const res = await fetch(VANCOUVER_WEATHER_URL, { cache: 'no-store' });
+                if (!res.ok) throw new Error(`Weather failed: ${res.status}`);
+                const data = await res.json();
+                saveWeatherToCache(data);
+                renderHomeTab();
+            } catch (error) {
+                console.error('Weather fetch error:', error);
+            }
+        }
+
+        function renderWeatherCard() {
+            if (!navigator.onLine && !weatherData) {
+                return `
+                <div class="luxury-card rounded-[1.5rem] p-4">
+                    <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Vancouver Weather</p>
+                    <p class="text-sm text-gray-500 mt-2">Weather unavailable offline</p>
+                </div>`;
+            }
+
+            if (!weatherData || !weatherData.current) {
+                return `
+                <div class="luxury-card rounded-[1.5rem] p-4">
+                    <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Vancouver Weather</p>
+                    <p class="text-sm text-gray-500 mt-2">Loading weather...</p>
+                </div>`;
+            }
+
+            const current = weatherData.current;
+            const [desc, icon] = getWeatherDescription(current.weather_code);
+            const sunrise = weatherData.daily?.sunrise?.[0] ? new Date(weatherData.daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+            const sunset = weatherData.daily?.sunset?.[0] ? new Date(weatherData.daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+            const updated = localStorage.getItem('travelAppWeatherSyncedAt') ? new Date(localStorage.getItem('travelAppWeatherSyncedAt')).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+            return `
+            <div class="luxury-card rounded-[1.5rem] p-4">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-14 h-14 rounded-2xl bg-earth-100 text-champagne flex items-center justify-center text-2xl shadow-sm shrink-0">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Vancouver, BC</p>
+                            <p class="font-display text-4xl font-semibold text-forest-900 leading-none mt-1">${Math.round(current.temperature_2m)}°C</p>
+                            <p class="text-sm text-gray-600 mt-1">${desc} • feels ${Math.round(current.apparent_temperature)}°</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-4 text-xs text-gray-600">
+                    <div><i class="fa-solid fa-droplet mr-1 text-forest-500"></i>Humidity ${current.relative_humidity_2m}%</div>
+                    <div><i class="fa-solid fa-wind mr-1 text-forest-500"></i>Wind ${Math.round(current.wind_speed_10m)} km/h</div>
+                    <div><i class="fa-solid fa-sun mr-1 text-champagne"></i>Sunrise ${sunrise}</div>
+                    <div><i class="fa-solid fa-moon mr-1 text-champagne"></i>Sunset ${sunset}</div>
+                </div>
+                <div class="flex justify-between items-center mt-4 pt-3 border-t border-earth-100">
+                    <p class="text-[11px] text-gray-400">${updated ? `Updated ${updated}` : 'Open-Meteo weather'}</p>
+                    <button onclick="forceRefreshWeather()" class="text-forest-500 text-sm p-2"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+            </div>`;
+        }
+
+        async function forceRefreshWeather() {
+            localStorage.removeItem('travelAppWeatherSyncedAt');
+            await fetchWeatherData();
+            showToast('Weather Updated');
+        }
+
+        function renderHomeTab() {
+            const home = document.getElementById('home-dashboard');
+            if (!home) return;
+
+            const range = getTripDateRange();
+            const dashboard = getDashboardPlanRecords();
+            const daysText = getDaysUntilTripText();
+            const itinerary = appData.itinerary || [];
+            const unique = Array.from(new Set(itinerary.map(item => item['Date']).filter(Boolean)))
+                .sort((a, b) => parseDateForSort(a) - parseDateForSort(b));
+            const uniqueDaysArr = unique;
+            const dayIndex = uniqueDaysArr.length && dashboard.selectedDate ? uniqueDaysArr.indexOf(dashboard.selectedDate) + 1 : '';
+
+            const periodCards = dashboard.records.map(record => {
+                const period = record['Period'] || record.Period || 'Period';
+                const destination = record['Destination'] || (record.isEmpty ? 'No plan yet' : 'TBD');
+                const activities = record['Activities & Reservations'] || '';
+                let icon = 'fa-sun';
+                if (period === 'Afternoon') icon = 'fa-cloud-sun';
+                if (period === 'Evening') icon = 'fa-moon';
+                return `
+                    <div class="bg-white/85 border border-earth-200 rounded-2xl p-3 shadow-sm min-w-[8.5rem] flex-1">
+                        <p class="text-[10px] uppercase tracking-[0.14em] text-forest-500 font-bold"><i class="fa-solid ${icon} mr-1 text-champagne"></i>${period}</p>
+                        <h4 class="font-display text-lg font-semibold text-forest-900 leading-tight mt-2">${destination}</h4>
+                        ${activities ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${activities}</p>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            home.innerHTML = `
+                <section class="relative overflow-hidden rounded-[2rem] min-h-[20rem] shadow-luxury text-white -mx-1">
+                    <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center"></div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-forest-900/35 via-forest-900/35 to-forest-900/80"></div>
+                    <div class="relative p-5 pt-6 min-h-[20rem] flex flex-col justify-between">
+                        <div class="self-end bg-white/85 text-forest-800 rounded-2xl px-3 py-2 shadow-soft text-xs">
+                            <i class="fa-solid fa-circle-check text-forest-600 mr-1"></i>${navigator.onLine ? 'Online' : 'Offline'} • Saved
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.25em] text-earth-200 font-bold">Travel Companion</p>
+                            <h2 class="font-display text-5xl font-semibold leading-none mt-2">Squamish</h2>
+                            <p class="font-display text-3xl italic text-champagne mt-1">Wedding Trip</p>
+                            <p class="text-sm mt-4"><i class="fa-regular fa-calendar mr-2"></i>${range.label}</p>
+                            <p class="text-sm text-white/85 mt-3 leading-relaxed">Your itinerary, bookings, shared costs and emergency contacts — saved in one place.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="luxury-card rounded-[1.5rem] p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold">Today's Plan</p>
+                            <h3 class="font-display text-2xl font-semibold text-forest-800">${formatDashboardDate(dashboard.selectedDate) || 'Plan Preview'}</h3>
+                        </div>
+                        <div class="text-right text-xs text-gray-500">
+                            <p>${dayIndex ? `Day ${dayIndex}` : 'Next plan'}</p>
+                            <p>${daysText}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto hide-scroll pb-1">${periodCards}</div>
+                    <button onclick="switchTabFromHome('itinerary', 'Plan')" class="w-full mt-4 pt-4 border-t border-earth-100 text-forest-700 font-semibold flex justify-center items-center gap-2">
+                        View full itinerary <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </section>
+
+                <section class="luxury-card rounded-[1.5rem] p-4">
+                    <p class="text-[10px] uppercase tracking-[0.18em] text-forest-400 font-bold mb-3">Quick Access</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="switchTabFromHome('itinerary', 'Plan')" class="bg-earth-50 border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
+                            <div class="w-10 h-10 rounded-2xl bg-[#DCE7DF] text-forest-700 flex items-center justify-center mb-3"><i class="fa-solid fa-route"></i></div>
+                            <p class="font-display text-xl font-semibold text-forest-900">Plan</p>
+                            <p class="text-xs text-gray-500">Itinerary & Activities</p>
+                        </button>
+                        <button onclick="switchTabFromHome('accommodation', 'Hotels')" class="bg-earth-50 border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
+                            <div class="w-10 h-10 rounded-2xl bg-[#EFE3CF] text-forest-700 flex items-center justify-center mb-3"><i class="fa-solid fa-bed"></i></div>
+                            <p class="font-display text-xl font-semibold text-forest-900">Hotels</p>
+                            <p class="text-xs text-gray-500">Accommodation Details</p>
+                        </button>
+                        <button onclick="switchTabFromHome('expenses', 'Costs')" class="bg-earth-50 border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
+                            <div class="w-10 h-10 rounded-2xl bg-[#DCE7DF] text-forest-700 flex items-center justify-center mb-3"><i class="fa-solid fa-wallet"></i></div>
+                            <p class="font-display text-xl font-semibold text-forest-900">Costs</p>
+                            <p class="text-xs text-gray-500">Expenses & Sharing</p>
+                        </button>
+                        <button onclick="switchTabFromHome('emergency', 'Emergency')" class="bg-[#F4E8E2] border border-earth-200 rounded-2xl p-4 text-left active:scale-[0.98] transition">
+                            <div class="w-10 h-10 rounded-2xl bg-[#D68A73] text-white flex items-center justify-center mb-3"><i class="fa-solid fa-phone-volume"></i></div>
+                            <p class="font-display text-xl font-semibold text-forest-900">SOS</p>
+                            <p class="text-xs text-gray-500">Emergency Phone List</p>
+                        </button>
+                    </div>
+                </section>
+
+                ${renderWeatherCard()}
+            `;
+        }
